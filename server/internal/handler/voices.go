@@ -126,7 +126,6 @@ func FetchVoices(ctx *gin.Context){
 
 func StreamAudio(ctx *gin.Context){
 
-	startTime := time.Now()
 
 	var Body StreamBody
 
@@ -174,6 +173,8 @@ func StreamAudio(ctx *gin.Context){
 		return
 	}
 
+
+	// ERROR NIYA KAY STRING BASA SA SOURCE DLI STREAM
 	
 	if resp != nil {
 		responseBody, readErr := io.ReadAll(resp.Body)
@@ -181,13 +182,15 @@ func StreamAudio(ctx *gin.Context){
 			log.Fatalln("Error reading request:", readErr)
 		}
 
-		executionTime := time.Since(startTime)
+		stream := bytes.NewReader([]byte(responseBody))
+		buffer := make([]byte, len(responseBody))
+		_, err := stream.Read(buffer)
+	    if err != nil && err != io.EOF {
+		    fmt.Println("Error reading from stream:", err)
+		    return
+	    }
 
-		ctx.JSON(http.StatusOK, gin.H{
-			"status":        resp.Status,
-			"response":      string(responseBody),
-			"executionTime": executionTime.String(),
-		})
+		ctx.DataFromReader(http.StatusOK, resp.ContentLength, resp.Header.Get("Content-Type"), resp.Body, nil)
 
 	} else {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
@@ -224,7 +227,7 @@ func sendStreamRequest(bodyChan chan *bytes.Buffer, respChan chan *http.Response
     }
 
     Header := map[string]string{
-        "Accept-Encoding": "audio/mpeg",
+        "Accept": "audio/mpeg",
         "Content-type":    "application/json",
         "AUTHORIZATION":   "dc23bdb0088e43d0ae92155f682d658b",
         "X-USER-ID":       "zXUVGgbbxFM42MjWQG3foHTHnLT2",
