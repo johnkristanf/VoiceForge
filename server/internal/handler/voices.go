@@ -15,6 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var voiceCollection *mongo.Collection = config.VoicesCollection()
@@ -43,6 +44,7 @@ type StreamBody struct{
 	Text string `json:"text"`
 	Voice string `json:"voice"`
 	Output_format string `json:"output_format"`
+	Speed float32 `json:"speed"`
 }
 
 
@@ -105,10 +107,10 @@ func FetchVoices(ctx *gin.Context){
 
 	var voices []VoiceStruct
 
-	filter := bson.M{"id": bson.M{"$regex": "^s3"}}
+	filter := bson.M{"id": bson.M{"$regex": "^s3"}, "gender" : bson.M{"$ne": ""}}
 
 
-	cursor, cursorErr := voiceCollection.Find(context.Background(), filter)
+	cursor, cursorErr := voiceCollection.Find(context.Background(), filter, options.Find().SetLimit(41))
 	if cursorErr != nil {
 		log.Fatalln("ERROR IN CURSOR", cursorErr.Error())
 	}
@@ -174,23 +176,39 @@ func StreamAudio(ctx *gin.Context){
 	}
 
 
-	// ERROR NIYA KAY STRING BASA SA SOURCE DLI STREAM
 	
 	if resp != nil {
-		responseBody, readErr := io.ReadAll(resp.Body)
-		if readErr != nil {
-			log.Fatalln("Error reading request:", readErr)
+
+		defer resp.Body.Close()
+		
+		ctx.Header("Content-Type", "audio/mpeg")
+		ctx.Header("Transfer-Encoding", "chunked")
+
+		// Read and send the streamed data to the client
+		buffer := make([]byte, 1024)
+
+		for {
+
+			numberOfBytesRead, readErr := resp.Body.Read(buffer)
+			if readErr != nil && readErr != io.EOF {
+				log.Println("Error reading from stream:", readErr)
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+				return
+			}
+
+			if numberOfBytesRead == 0 {
+				break
+			}
+
+			// Write the chunk to the response buffer
+			_, writeErr := ctx.Writer.Write(buffer[:numberOfBytesRead])
+			if writeErr != nil {
+				return
+			}
+
+			// Flush the response buffer to send the data immediately
+			ctx.Writer.Flush()
 		}
-
-		stream := bytes.NewReader([]byte(responseBody))
-		buffer := make([]byte, len(responseBody))
-		_, err := stream.Read(buffer)
-	    if err != nil && err != io.EOF {
-		    fmt.Println("Error reading from stream:", err)
-		    return
-	    }
-
-		ctx.DataFromReader(http.StatusOK, resp.ContentLength, resp.Header.Get("Content-Type"), resp.Body, nil)
 
 	} else {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
@@ -210,6 +228,7 @@ func parseBodyToJson(Body StreamBody, bodyChan chan *bytes.Buffer, errorChan cha
 
     bodyChan <- reqBody
 }
+
 
 func sendStreamRequest(bodyChan chan *bytes.Buffer, respChan chan *http.Response, errorChan chan error) {
     defer close(respChan)
@@ -243,6 +262,7 @@ func sendStreamRequest(bodyChan chan *bytes.Buffer, respChan chan *http.Response
         errorChan <- err
         return
     }
+
 
     respChan <- resp
 }
