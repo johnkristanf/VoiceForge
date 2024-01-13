@@ -5,7 +5,7 @@ export function SideBar(){
 
     return(
 
-        <aside className="bg-slate-900 h-screen w-[20%] p-5 flex flex-col items-center gap-10 relative">
+        <aside className="bg-slate-900 h-screen w-[20%] p-5 flex flex-col items-center gap-10 fixed left-0">
            <Logo />
            <SideBarLinks />
 
@@ -30,6 +30,7 @@ const link = [
     {name: "Voice Cloning", icon: <FontAwesomeIcon icon={faClone}/> },
     {name: "Settings", icon: <FontAwesomeIcon icon={faGear}/> }
 ]
+
 
 
 function SideBarLinks(){
