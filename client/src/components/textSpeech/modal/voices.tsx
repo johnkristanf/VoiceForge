@@ -5,9 +5,9 @@ import { VoiceTypes } from "../../../types/textSpeech";
 import { generateRandomString, generateArrayOfNumbers } from "../../../utils/randomGenerator";
 import { sortVoiceNameinParam } from "../../../utils/sort";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faX } from "@fortawesome/free-solid-svg-icons";
+import { faX, faPlay, faPause } from "@fortawesome/free-solid-svg-icons";
 
 import '../../../../public/ScrollStyle.css';
 
@@ -37,7 +37,7 @@ export function VoicesModal({selectedVoice, setselectedSpeed, setSelectedVoice, 
 
                     <TableVoices setSelectedVoice={setSelectedVoice} />
 
-                    <VoiceInUse selectedVoice={selectedVoice} setselectedSpeed={setselectedSpeed} />
+                    <VoiceInUse selectedVoice={selectedVoice} setselectedSpeed={setselectedSpeed}  setOpenVoiceModal={setOpenVoiceModal}/>
                   
                 </div>
 
@@ -48,85 +48,144 @@ export function VoicesModal({selectedVoice, setselectedSpeed, setSelectedVoice, 
 }
 
 
-function TableVoices({setSelectedVoice}: any){
+function TableVoices({ setSelectedVoice }: any) {
 
+    const [AudioLoading,setAudioLoading] = useState<boolean>(false)
     const [voicesData, setVoicesData] = useState<VoiceTypes[]>();
 
+    const [playingSample, setPlayingSample] = useState<string | null>(null);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+  
     const tHead = [
-        {name: "Name"},
-        {name: "Gender"},
-        {name: "Accent"},
-        {name: "Language"}
-    ]
-
+      { name: "Name" },
+      { name: "Gender" },
+      { name: "Accent" },
+      { name: "Language" },
+    ];
+  
     useEffect(() => {
-
-        async function fetchVoices() {
-            try {
-                setVoicesData(await getVoices())
-            } catch (error) {
-                console.error(error)
-            }
+      async function fetchVoices() {
+        try {
+          setVoicesData(await getVoices());
+        } catch (error) {
+          console.error(error);
         }
+      }
+  
+      fetchVoices();
+    }, []);
+  
+    const sortedArr = sortVoiceNameinParam(voicesData);
+  
+    const handleAudioPlayPause = (voice: VoiceTypes) => {
 
-        fetchVoices();
+        const audio = audioRef.current;
+      
+        if (audio) {
 
-    }, []); 
+          if (playingSample === voice.sample) {
+            audio.pause();
+            setPlayingSample(null);
 
+          } else {
 
-    const sortedArr = sortVoiceNameinParam(voicesData)
+            if (playingSample) {
+              const playingAudio = audioRef.current;
+              playingAudio?.pause();
+            }
+      
+            
+            audio.src = voice.sample;
+      
+            audio.addEventListener('canplay', () => {
+              audio.play().then(() => {
+                setPlayingSample(voice.sample);
+              });
 
+            });
+
+            audio.addEventListener('error', (error) => {
+              console.error('Error loading audio:', error);
+            });
+
+          }
+        }
+      };
+      
+  
     return (
+      <div className="h-[65%] w-full p-5 overflow-auto scrollable-container">
 
-        <div className="h-[65%] w-full p-5 overflow-auto scrollable-container">
+        {sortedArr ? (
 
-            { voicesData ? (
+          <table className="text-white font-semibold text-center w-full border-collapse border border-slate-700">
 
-                <table className="text-white font-semibold text-center w-full border-collapse border border-slate-700">
-                    <thead>
-                        <tr>
+            <thead>
+              <tr>
 
-                            {
-                                tHead.map((item) => (
-                                    <th className="border-b border-slate-700">{item.name}</th>
-                                ))
-                            }
-                        </tr>
+                {tHead.map((item) => (
 
-                    </thead>
+                  <th key={item.name} className="border-b border-slate-700">
+                    {item.name}
+                  </th>
 
-                    <tbody>
+                ))}
 
-                        {sortedArr?.map((voice) => (
+              </tr>
+            </thead>
 
-                            <tr 
-                               className="hover:bg-slate-800 hover:cursor-pointer"
-                               key={generateRandomString()} 
-                               onClick={() => setSelectedVoice({ voice: voice.id, name: voice.name, output_format: 'mp3' })}
-                               >
+            <tbody>
 
-                                <td className="py-5">{voice.name}</td>
-                                <td className="py-5">{voice.gender.charAt(0).toUpperCase() + voice.gender.slice(1) }</td>
-                                <td className="py-5">{voice.accent.charAt(0).toUpperCase() + voice.accent.slice(1) }</td>
-                                <td className="py-5">{voice.language}</td>
-                            </tr>
+              {sortedArr?.map((voice) => (
+                
+                <tr
+                  className="hover:bg-slate-800 hover:cursor-pointer"
+                  key={generateRandomString()}
+                  onClick={() => setSelectedVoice({voice: voice.id, name: voice.name, output_format: "mp3"})}
+                >
+                  <td className="py-5">
 
-                        ))}
+                    <button
+                      className="w-[10%] bg-gray-400 p-1 text-center rounded-full mr-5 hover:opacity-75"
+                      onClick={() => handleAudioPlayPause(voice)}
+                    > 
 
-                    </tbody>
-                </table>
+                      {AudioLoading && <p className="text-red-800">Loading pa dol</p>}
 
-            ) : (
-                <p className="text-white text-2xl">Loading...</p>
-            )}
+                      <FontAwesomeIcon
+                        icon={playingSample === voice.sample ? faPause : faPlay}
+                      />
 
-        </div>
-    )
-}
+                    </button>
+
+                    {voice.name}
+
+                  </td>
+
+                  <td className="py-5">{voice.gender.charAt(0).toUpperCase() + voice.gender.slice(1)}</td>
+                  <td className="py-5">{voice.accent.charAt(0).toUpperCase() + voice.accent.slice(1)}</td>
+                  <td className="py-5">{voice.language}</td>
+
+                </tr>
+
+              ))}
+
+            </tbody>
+
+          </table>
+
+        ) : (
+          <p className="text-white text-2xl">Loading...</p>
+        )}
+
+        <audio ref={audioRef} controls className="w-[20%] hidden" />
+        
+      </div>
+    );
+  }
 
 
-
-function VoiceInUse({selectedVoice, setselectedSpeed}: any) {
+function VoiceInUse({ selectedVoice, setselectedSpeed, setOpenVoiceModal }: any) {
 
     const numbersArray = generateArrayOfNumbers();
 
@@ -159,6 +218,7 @@ function VoiceInUse({selectedVoice, setselectedSpeed}: any) {
             </div>
 
             <button 
+                onClick={() => setOpenVoiceModal(false)} 
                 className="p-2 rounded-md text-white font-bold w-[18%] h-[70%] bg-indigo-800 hover:opacity-75"
                 >
                 Confirm

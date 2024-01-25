@@ -1,6 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComments, faClone, faGear, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 
+import { Link } from 'react-router-dom';
+
 export function SideBar(){
 
     return(
@@ -26,9 +28,9 @@ function Logo(){
 
 
 const link = [
-    {name: "Text to Speech", icon: <FontAwesomeIcon icon={faComments}/> },
-    {name: "Voice Cloning", icon: <FontAwesomeIcon icon={faClone}/> },
-    {name: "Settings", icon: <FontAwesomeIcon icon={faGear}/> }
+    {name: "Text to Speech", to: "text-speech", icon: <FontAwesomeIcon icon={faComments}/> },
+    {name: "Voice Cloning", to: "voice-cloning", icon: <FontAwesomeIcon icon={faClone}/> },
+    {name: "Settings", to: "settings", icon: <FontAwesomeIcon icon={faGear}/> }
 ]
 
 
@@ -43,10 +45,10 @@ function SideBarLinks(){
             {
                 link.map((item) => (
 
-                    <li key={item.name} className="mt-10 hover:opacity-100 hover:cursor-pointer opacity-75">
+                    <Link key={item.name} to={`/${item.to}`}><li className="mt-10 hover:opacity-100 hover:cursor-pointer opacity-75">
                         {item.icon} {item.name}
-                    </li>
-                ))
+                    </li></Link>
+                    ))
             }
             
         </ul>

@@ -3,6 +3,7 @@ import React, { Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 const TextSpeech = React.lazy(() => import("./pages/TextSpeech"))
+const VoiceCloning = React.lazy(() => import('./pages/VoiceCloning'))
 
 const App = () => {
 
@@ -12,7 +13,8 @@ const App = () => {
     <Suspense fallback={<div>Loading...</div>}>
 
          <Routes>
-                <Route path="/text-speech" Component={TextSpeech} />
+                <Route path="text-speech" Component={TextSpeech} />
+                <Route path="voice-cloning" Component={VoiceCloning} />
          </Routes>
 
      </Suspense>
