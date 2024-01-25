@@ -1,25 +1,31 @@
-import React, {  useState } from "react";
-import { SpeechVoiceBtn } from "../ui/button";
+import React, {  useEffect, useState } from "react";
+import { SpeechVoiceBtn, GenerateSpeechBtn, StreamAudioActionsBtn } from "../ui/button";
 import { SpeechTextArea } from "../ui/input";
 
-import ReactPlayer from "react-player";
+import { fetchAudioData } from "../../services/http/get/audioData";
 
-import { TextToSpeech } from "../../types/textSpeech";
+import { TextToSpeech, AudioDataTypes } from "../../types/textSpeech";
 import { streamAudio } from "../../services/http/post/streamAudio";
 import { VoicesModal } from "./modal/voices";
+
+import { getBlobUrl } from "../../utils/stream";
+
+import '../../../public/ScrollStyle.css';
+
 
 export function SpeechForm() {
 
   const [OpenVoiceModal, setOpenVoiceModal] = useState<boolean>(false);
   const [audioURL, setaudioURL] = useState<string>('')
+  
   const [selectedVoice, setSelectedVoice] = useState<{voice: string, name: string, output_format: string;}>({
-    voice: "",
-    name: "",
-    output_format: ""
+    voice: "s3://mockingbird-prod/charlotte_vo_narrative_9290be17-ccea-4700-a7fd-a8fe5c49fb20/voices/speaker/manifest.json",
+    name: "Charlotte (Narrative)",
+    output_format: "mp3"
 
   });
 
-  const [selectedSpeed, setselectedSpeed] = useState<string>("0.5");
+  const [selectedSpeed, setselectedSpeed] = useState<string>("1");
   const [Text, setText] = useState<string>('');
 
   const textToSpeechData: TextToSpeech = {
@@ -29,9 +35,6 @@ export function SpeechForm() {
     speed: parseFloat(selectedSpeed)
 
   };
-
-  console.log('selectedVoice', selectedVoice);
-  console.log('selectedSpeed', selectedSpeed);
 
   const onSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -44,25 +47,24 @@ export function SpeechForm() {
       setaudioURL(audioURL)
     }
 
+    setText('')
+
   };
 
 
 
   return (
     <>
-        <div className="flex flex-col w-[60%] mt-24 ml-24">
+        <div className="flex flex-col w-[60%] mt-12 ml-24">
 
             <div className="flex w-full">
-              <SpeechVoiceBtn setOpenVoiceModal={setOpenVoiceModal} />
+              <SpeechVoiceBtn selectedVoice={selectedVoice} setOpenVoiceModal={setOpenVoiceModal} />
             </div>
 
-            <form onSubmit={onSubmit} className="w-full h-[60%] flex items-start gap-3">
-              <SpeechTextArea setText={setText} />
+            <form onSubmit={onSubmit} className="w-full h-[40%] flex items-start gap-3 mb-3">
+              <SpeechTextArea Text={Text} setText={setText} />
 
-              <div className="flex flex-col p-4 gap-3 bg-slate-900 w-[40%] h-[55%] rounded-md">
-                <button type="submit" className="text-white font-semibold bg-indigo-800 w-full rounded-md p-5 hover:opacity-75">Generate Speech</button>
-                <p className="text-white font-bold opacity-75 text-[12px]">Unleash the potential of text-to-speech innovation and share your message in a unique and engaging way</p>
-              </div>
+              <GenerateSpeechBtn /> 
 
             </form>
 
@@ -87,16 +89,54 @@ export function SpeechForm() {
 }
 
 
-function AudioPlayer({audioURL}: any){
+function AudioPlayer({ audioURL }: any) {
+  
+  const [audioDataArray, setAudioDataArray] = useState<AudioDataTypes>();
+  const [deletedID, setdeletedID] = useState<Number>()
 
-    return(
-        <div className="flex">
+    useEffect(() => {
+      async function fetchData() {
+        const { audioDataArray } = await fetchAudioData();
+        setAudioDataArray(audioDataArray);
+      }
 
-            {
-              audioURL ? (<ReactPlayer height="80px" url={audioURL} controls config={{ file: { forceAudio: true } }}/>) 
-              : (<p>Loading...</p>)
-            }
+      fetchData();
 
-        </div>
-    )
+    }, [audioURL, deletedID]);
+
+
+
+  return (
+
+    <div className="flex flex-col gap-3 h-[40%]">
+      <h1 className="text-white font-bold text-2xl">Generated Speech</h1>
+
+      <div className="overflow-auto scrollable-container">
+
+        {audioDataArray?.map((item) => (
+          
+          <div
+            key={item.audioStream} 
+            className="flex justify-around items-center bg-slate-900 p-3 mb-4 rounded-md gap-5"
+          >
+
+            <h1 className="w-[40%] truncate font-bold">{item.audioText}</h1>
+
+            <audio
+              src={getBlobUrl(item.audioStream)}
+              controls
+              className="h-[40px]"
+              controlsList="nodownload nofullscreen noremoteplayback"
+            />
+
+            <StreamAudioActionsBtn setdeletedID={setdeletedID} audio_id={item.audio_id} base64StreamBinary={item.audioStream} />
+
+          </div>
+
+        ))}
+
+      </div>
+    </div>
+  );
 }
+
