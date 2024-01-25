@@ -51,15 +51,16 @@ func (s *ApiServer) Run() error {
 	requestHandler := s.cors.Handler(router) 
 
 	// GET HANDLER
-	router.HandleFunc("/api/audio/data", makeHTTPHandlerFunc(s.FetchAudioData))
-	router.HandleFunc("/api/voices", makeHTTPHandlerFunc(s.FetchVoices))
+	router.HandleFunc("/api/audio/data", makeHTTPHandlerFunc(s.FetchAudioDataHandler))
+	router.HandleFunc("/api/voices", makeHTTPHandlerFunc(s.FetchVoicesHandler))
 
 	// POST HANDLER
-	router.HandleFunc("/api/stream/voices", makeHTTPHandlerFunc(s.StreamAudio))
-	router.HandleFunc("/api/voice/clone", makeHTTPHandlerFunc(s.VoiceClone))
+	router.HandleFunc("/api/stream/voices", makeHTTPHandlerFunc(s.StreamAudioHandler))
+	router.HandleFunc("/api/voice/clone", makeHTTPHandlerFunc(s.VoiceCloneHandler))
+	router.HandleFunc("/auth/signup", makeHTTPHandlerFunc(s.SignUpHandler))
 
 	// DELETE HANDLER
-	router.HandleFunc("/api/audio/delete/{audio_id}", makeHTTPHandlerFunc(s.DeleteAudioData))
+	router.HandleFunc("/api/audio/delete/{audio_id}", makeHTTPHandlerFunc(s.DeleteAudioDataHandler))
 
 
 

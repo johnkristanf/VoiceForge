@@ -16,6 +16,8 @@ type Method interface{
 	InsertAudioStream(string, *bytes.Buffer) error
 	FetchAudioStream() ([]*types.AudioStruct, error)
 	DeleteAudioData(int64) (int64, error)
+
+	SignUp(*types.SignupCredentials) error
 }
 
 type SQL_DB struct{
@@ -62,7 +64,15 @@ func (sql *SQL_DB) DBInit() error {
 		return err
 	}
 
+	if err := sql.CreateVoiceIndex(); err != nil{
+		return err
+	}
+
 	if err := sql.CreateAudioTable(); err != nil{
+		return err
+	}
+
+	if err := sql.CreateUserTable(); err != nil{
 		return err
 	}
 

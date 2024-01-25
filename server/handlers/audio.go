@@ -19,7 +19,7 @@ import (
 var wg sync.WaitGroup
 
 
-func (s *ApiServer) StreamAudio(res http.ResponseWriter, req *http.Request) error {
+func (s *ApiServer) StreamAudioHandler(res http.ResponseWriter, req *http.Request) error {
 
 	if err := utils.HttpMethod(http.MethodPost, req); err != nil{
 		return err
@@ -112,7 +112,7 @@ func (s *ApiServer) sendStreamRequestAndWriteBuffer(buffer *bytes.Buffer, stream
 }
 
 
-func (s *ApiServer) FetchAudioData(res http.ResponseWriter, req *http.Request) error {
+func (s *ApiServer) FetchAudioDataHandler(res http.ResponseWriter, req *http.Request) error {
 	startTime := time.Now()
 
 	if err := utils.HttpMethod(http.MethodGet, req); err != nil{
@@ -146,7 +146,7 @@ func (s *ApiServer) FetchAudioData(res http.ResponseWriter, req *http.Request) e
 }
 
 
-func (s *ApiServer) DeleteAudioData(res http.ResponseWriter, req *http.Request) error {
+func (s *ApiServer) DeleteAudioDataHandler(res http.ResponseWriter, req *http.Request) error {
 
 	if err := utils.HttpMethod(http.MethodDelete, req); err != nil{
 		return err

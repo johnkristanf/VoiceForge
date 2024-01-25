@@ -34,6 +34,18 @@ func (sql *SQL_DB) CreateVoicesTable() error {
 
 }
 
+func (sql *SQL_DB) CreateVoiceIndex() error {
+
+	query := "CREATE INDEX IF NOT EXISTS idx_voice_name ON voices (name);"
+
+	_, err := sql.database.Exec(query)
+	if err != nil{
+		return err
+	}
+
+	return nil
+}
+
 
 func (sql *SQL_DB) InsertVoice(voice *types.VoiceStruct) error{
 	query := `INSERT INTO voices(

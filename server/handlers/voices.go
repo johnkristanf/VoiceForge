@@ -13,7 +13,7 @@ import (
 )
 
 
-func (s *ApiServer) FetchAndInsertVoicesInDB(res http.ResponseWriter, req *http.Request) error {
+func (s *ApiServer) FetchAndInsertVoicesInDBHandler(res http.ResponseWriter, req *http.Request) error {
 
 	if err := utils.HttpMethod("GET", req); err != nil{
 		return err
@@ -60,7 +60,7 @@ func (s *ApiServer) FetchAndInsertVoicesInDB(res http.ResponseWriter, req *http.
 }
 
 
-func (s *ApiServer) FetchVoices(res http.ResponseWriter, req *http.Request) error {
+func (s *ApiServer) FetchVoicesHandler(res http.ResponseWriter, req *http.Request) error {
 	startTime := time.Now()
 
 	if err := utils.HttpMethod(http.MethodGet, req); err != nil{
@@ -103,7 +103,7 @@ func (s *ApiServer) FetchVoices(res http.ResponseWriter, req *http.Request) erro
 }
 
 
-func (s *ApiServer) VoiceClone(res http.ResponseWriter, req *http.Request) error{
+func (s *ApiServer) VoiceCloneHandler(res http.ResponseWriter, req *http.Request) error{
 
 	if err := utils.HttpMethod(http.MethodPost, req); err != nil{
 		return err

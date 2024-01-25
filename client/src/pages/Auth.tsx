@@ -1,4 +1,9 @@
-import React, { useState } from "react"
+import React, { useRef, useState } from "react"
+import { useForm } from "react-hook-form";
+import { SignupCredentials, validEmail } from "../types/auth";
+import { SignupValidation } from "../validator/auth";
+import { Signup } from "../services/http/post/auth";
+import { useNavigate } from "react-router-dom";
 
 const Auth: React.FC  = () => {
   const [Signup, setSignup] = useState<boolean>(false);
@@ -11,6 +16,26 @@ const Auth: React.FC  = () => {
 
 
 const SignupForm = ({setSignup}: any) => {
+
+  const { register, reset, handleSubmit, formState: { errors } } = useForm<SignupCredentials>();
+  const signupRef = useRef<HTMLParagraphElement | null>(null);
+
+  const onSubmit = async (signUpCredentials: SignupCredentials) =>{
+    
+    const signup = await Signup(signUpCredentials)
+
+    if(signup){
+
+      if(signupRef.current) signupRef.current.textContent = 'Signup Successfully';
+      reset();
+
+      setTimeout(() => {
+        setSignup(false)
+      }, 1500)
+    
+    }
+     
+  }
 
   return(
       
@@ -37,16 +62,23 @@ const SignupForm = ({setSignup}: any) => {
                 </h4>
               </div>
 
-              <form>
+              <form onSubmit={handleSubmit(onSubmit)} >
                 <p className="mb-4">Signup to get Started</p>
+
+                <p ref={signupRef} className="text-green-500 text-center font-bold text-lg mb-3"></p>
+                { SignupValidation(errors) }
+
                
                 <div className="relative mb-4" data-te-input-wrapper-init>
                   <input
                     type="text"
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0 focus:outline-blue-800"
                     id="exampleFormControlInput1"
-                    placeholder="Username" />
-                 
+                    placeholder="Email" 
+                    {...register("email", { required: true, pattern: validEmail })}
+                    
+                    />
+                    
                 </div>
 
                 
@@ -55,7 +87,10 @@ const SignupForm = ({setSignup}: any) => {
                     type="password"
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0 focus:outline-blue-800"
                     id="exampleFormControlInput11"
-                    placeholder="Password" />
+                    placeholder="Password" 
+                    {...register("password", { required: true, minLength: 8})}
+
+                    />
                  
                 </div>
 
@@ -119,6 +154,9 @@ const SignupForm = ({setSignup}: any) => {
 
 const LoginForm = ({setSignup}: any) => {
 
+  const navigate = useNavigate()
+
+
   return(
       
 <section className="h-full bg-neutral-200 dark:bg-neutral-700">
@@ -149,10 +187,10 @@ const LoginForm = ({setSignup}: any) => {
                
                 <div className="relative mb-4" data-te-input-wrapper-init>
                   <input
-                    type="text"
+                    type="email"
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0 focus:outline-blue-800"
                     id="exampleFormControlInput1"
-                    placeholder="Username" />
+                    placeholder="Email" />
                  
                 </div>
 
