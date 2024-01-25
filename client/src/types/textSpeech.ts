@@ -16,3 +16,11 @@ export type VoiceTypes = {
   style: string
   sample: string
 }
+
+
+export type AudioDataTypes = {
+  audioStream: string
+  audio_id: string
+  audioText: string
+  
+}[]
