@@ -1,13 +1,17 @@
+import { useRef } from 'react';
 import '../../../public/ScrollStyle.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
 
-export function SpeechTextArea({setText}: any){
+export function SpeechTextArea({Text, setText}: any){
 
   
     return(
         <textarea 
-          name="text" 
+          name="text"
+          value={Text} 
           onChange={(e) => setText(e.target.value)}
-          className="bg-slate-800 rounded-b-md scrollable-container rounded-tr-md text-white resize-none h-[55%] focus:outline-none p-3 w-full" 
+          className="bg-slate-800 rounded-b-md scrollable-container rounded-tr-md text-white resize-none h-[75%] focus:outline-none p-3 w-full" 
           placeholder="Type Here...." 
         />
     )
@@ -19,4 +23,82 @@ export function SearchVoices(){
            type="search" 
            className="p-3 text-white w-[60%] rounded-md bg-transparent focus:outline-indigo-800 focus:outline-none border border-slate-700" 
            placeholder="Search Voice"/>
+}
+
+
+export function VoiceCloningInput({ register, setVoicefile }: any){
+
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+    const handleButtonClick = () => fileInputRef.current?.click();
+      
+
+    return(
+
+        <div className="flex flex-col gap-8 mt-5">
+
+            <div className="flex flex-col gap-2">
+                <h1 className='font-semibold'>Voice Name:</h1>
+                <input 
+                    type="text" 
+                    className='p-4 border rounded-md font-bold' 
+                    placeholder='Enter voice name'
+                    {...register("voice_name", { required: true })}
+                />
+
+            </div>
+
+            <div className="flex flex-col gap-2">
+                <h1 className='font-semibold'>Gender:</h1>
+
+                <select 
+                      className='rounded-md p-3 text-center font-bold focus:outline-none' 
+                      {...register("gender", { required: true })}
+                    >
+
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+
+                </select>
+
+            </div>
+           
+
+            <div className="flex flex-col gap-2">
+
+                <h1 className='font-semibold'>Upload High Quality Audio sample</h1>
+
+                <button 
+                  type='button'
+                  onClick={() => handleButtonClick()}
+                  className=' bg-slate-800 p-3 rounded-md w-full flex flex-col items-center'
+                  >
+                    <FontAwesomeIcon icon={faCloudArrowUp}/>
+                    Upload file here or browse
+                </button>
+
+                <p className='font-semibold opacity-75 text-sm'>
+                    Minimum file size: 5kb 
+                    <br /> 
+                    Maximum file size: 50mb
+                </p>
+
+                <input
+                    onChange={(e) => {
+                      const selectedFile = e.target.files;
+                      if (selectedFile) {
+                        setVoicefile(selectedFile);
+                      }
+                    }}
+
+                    type="file"
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                />
+
+            </div>
+        
+        </div>
+
+    )
 }
