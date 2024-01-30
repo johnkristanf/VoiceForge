@@ -3,6 +3,7 @@ import '../../../public/ScrollStyle.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
 
+
 export function SpeechTextArea({Text, setText}: any){
 
   
@@ -18,11 +19,18 @@ export function SpeechTextArea({Text, setText}: any){
 }
 
 
-export function SearchVoices(){
-    return <input
-           type="search" 
-           className="p-3 text-white w-[60%] rounded-md bg-transparent focus:outline-indigo-800 focus:outline-none border border-slate-700" 
-           placeholder="Search Voice"/>
+export function SearchVoices({setSearchVoice}: any){
+
+
+    return (
+        <input
+        type="search" 
+        className="p-3 text-white w-[60%] rounded-md bg-transparent focus:outline-indigo-800 focus:outline-none border border-slate-700" 
+        placeholder="Search Voice"
+        onChange={(e) => setSearchVoice(e.target.value)}
+        />
+       
+    )
 }
 
 
@@ -45,21 +53,6 @@ export function VoiceCloningInput({ register, setVoicefile }: any){
                     placeholder='Enter voice name'
                     {...register("voice_name", { required: true })}
                 />
-
-            </div>
-
-            <div className="flex flex-col gap-2">
-                <h1 className='font-semibold'>Gender:</h1>
-
-                <select 
-                      className='rounded-md p-3 text-center font-bold focus:outline-none' 
-                      {...register("gender", { required: true })}
-                    >
-
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-
-                </select>
 
             </div>
            

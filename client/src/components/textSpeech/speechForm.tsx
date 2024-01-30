@@ -32,8 +32,7 @@ export function SpeechForm() {
     text: Text,
     voice: selectedVoice?.voice,
     output_format: selectedVoice?.output_format,
-    speed: parseFloat(selectedSpeed)
-
+    speed: parseFloat(selectedSpeed),
   };
 
   const onSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
@@ -108,7 +107,7 @@ function AudioPlayer({ audioURL }: any) {
 
   return (
 
-    <div className="flex flex-col gap-3 h-[40%]">
+    <div className="flex flex-col gap-3 h-[40%] text-white">
       <h1 className="text-white font-bold text-2xl">Generated Speech</h1>
 
       <div className="overflow-auto scrollable-container">

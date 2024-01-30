@@ -1,9 +1,8 @@
 import React, { useRef, useState } from "react"
 import { useForm } from "react-hook-form";
-import { SignupCredentials, validEmail } from "../types/auth";
+import { LoginCredentials, SignupCredentials, validEmail } from "../types/auth";
 import { SignupValidation } from "../validator/auth";
-import { Signup } from "../services/http/post/auth";
-import { useNavigate } from "react-router-dom";
+import { Login, Signup } from "../services/http/post/auth";
 
 const Auth: React.FC  = () => {
   const [Signup, setSignup] = useState<boolean>(false);
@@ -50,7 +49,7 @@ const SignupForm = ({setSignup}: any) => {
         <div className="g-0 lg:flex lg:flex-wrap">
           
           <div className="px-4 md:px-0 lg:w-6/12">
-            <div className="md:mx-6 md:p-12 bg-indigo-800 rounded-md">
+            <div className="md:mx-6 md:p-12 text-white bg-slate-900 rounded-md">
              
               <div className="text-center">
                 <img
@@ -70,9 +69,11 @@ const SignupForm = ({setSignup}: any) => {
 
                
                 <div className="relative mb-4" data-te-input-wrapper-init>
+                  <label className="font-bold">Email:</label>
+
                   <input
                     type="text"
-                    className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0 focus:outline-blue-800"
+                    className="peer block bg-slate-700 mt-5 min-h-[auto] w-full rounded border-0 px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0 focus:outline-blue-800"
                     id="exampleFormControlInput1"
                     placeholder="Email" 
                     {...register("email", { required: true, pattern: validEmail })}
@@ -83,9 +84,11 @@ const SignupForm = ({setSignup}: any) => {
 
                 
                 <div className="relative mb-4" data-te-input-wrapper-init>
+                  <label className="font-bold">Password:</label>
+
                   <input
                     type="password"
-                    className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0 focus:outline-blue-800"
+                    className="peer block bg-slate-700 mt-5 min-h-[auto] w-full rounded border-0 px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0 focus:outline-blue-800"
                     id="exampleFormControlInput11"
                     placeholder="Password" 
                     {...register("password", { required: true, minLength: 8})}
@@ -97,7 +100,7 @@ const SignupForm = ({setSignup}: any) => {
                
                 <div className="mb-12 pb-1 pt-1 text-center">
                   <button
-                    className="mb-3 inline-block w-full rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase bg-slate-400 leading-normal text-white shadow-[0_4px_9px_-4px_rgba(0,0,0,0.2)] transition duration-150 ease-in-out hover:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)] focus:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)] focus:outline-none focus:ring-0 active:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)]"
+                    className="mb-3 inline-block w-full rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase bg-indigo-700 leading-normal text-white shadow-[0_4px_9px_-4px_rgba(0,0,0,0.2)] transition duration-150 ease-in-out hover:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)] focus:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)] focus:outline-none focus:ring-0 active:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)]"
                     type="submit"
                     data-te-ripple-init
                     data-te-ripple-color="light"
@@ -128,7 +131,7 @@ const SignupForm = ({setSignup}: any) => {
           </div>
 
           
-          <div className="flex items-center rounded-b-lg lg:w-6/12 lg:rounded-r-lg lg:rounded-bl-none bg-slate-500 rounded-md">
+          <div className="flex items-center rounded-b-lg lg:w-6/12 lg:rounded-r-lg lg:rounded-bl-none bg-slate-700 rounded-md">
            
             <div className="px-4 py-6 text-white md:mx-6 md:p-12">
               <h4 className="mb-6 text-4xl font-semibold">
@@ -154,7 +157,27 @@ const SignupForm = ({setSignup}: any) => {
 
 const LoginForm = ({setSignup}: any) => {
 
-  const navigate = useNavigate()
+  const { register, reset, handleSubmit, formState: { errors } } = useForm<LoginCredentials>();
+  const loginRef = useRef<HTMLParagraphElement | null>(null);
+
+  const onSubmit = async (loginCredentials: LoginCredentials) => {
+
+    const login = await Login(loginCredentials)
+    console.log('login res', login)
+
+    if(login.Need_Verification){
+      window.location.href = '/verify'
+      return
+    }
+
+    if(login.Invalid_Credentials){
+      if(loginRef.current) loginRef.current.textContent = login.Invalid_Credentials;
+      return
+    }
+
+    window.location.href = '/text-speech';
+    reset()
+  }
 
 
   return(
@@ -170,7 +193,7 @@ const LoginForm = ({setSignup}: any) => {
         <div className="g-0 lg:flex lg:flex-wrap">
           
           <div className="px-4 md:px-0 lg:w-6/12">
-            <div className="md:mx-6 md:p-12 bg-indigo-800 rounded-md">
+            <div className="md:mx-6 md:p-12 text-white bg-slate-900 rounded-md">
              
               <div className="text-center">
                 <img
@@ -182,32 +205,41 @@ const LoginForm = ({setSignup}: any) => {
                 </h4>
               </div>
 
-              <form>
+              <form  onSubmit={handleSubmit(onSubmit)} >
                 <p className="mb-4">Please login to your account</p>
                
+
+                <p ref={loginRef} className="text-red-800 text-center text-lg font-bold mb-3"></p>
+                { SignupValidation(errors) }
+
                 <div className="relative mb-4" data-te-input-wrapper-init>
+                  <label className="font-bold">Email:</label>
                   <input
-                    type="email"
-                    className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0 focus:outline-blue-800"
+                    type="text"
+                    className="peer block mt-5 min-h-[auto] w-full rounded border-0 bg-slate-700 px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:placeholder:text-white [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0 focus:outline-blue-800"
                     id="exampleFormControlInput1"
-                    placeholder="Email" />
+                    placeholder="Email" 
+                    {...register("email", { required: true })}
+                    />
                  
                 </div>
 
                 
                 <div className="relative mb-4" data-te-input-wrapper-init>
+                   <label className="font-bold">Password:</label>
                   <input
                     type="password"
-                    className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0 focus:outline-blue-800"
+                    className="peer mt-5 block min-h-[auto] w-full rounded border-0 bg-slate-700 px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0 focus:outline-blue-800"
                     id="exampleFormControlInput11"
-                    placeholder="Password" />
+                    placeholder="Password" 
+                    {...register("password", { required: true })}/>
                  
                 </div>
 
                
                 <div className="mb-12 pb-1 pt-1 text-center">
                   <button
-                    className="mb-3 inline-block w-full rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase bg-slate-400 leading-normal text-white shadow-[0_4px_9px_-4px_rgba(0,0,0,0.2)] transition duration-150 ease-in-out hover:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)] focus:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)] focus:outline-none focus:ring-0 active:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)]"
+                    className="mb-3 inline-block w-full rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase bg-indigo-700 hover:opacity-75 leading-normal text-white shadow-[0_4px_9px_-4px_rgba(0,0,0,0.2)] transition duration-150 ease-in-out hover:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)] focus:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)] focus:outline-none focus:ring-0 active:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)]"
                     type="submit"
                     data-te-ripple-init
                     data-te-ripple-color="light"
@@ -238,7 +270,7 @@ const LoginForm = ({setSignup}: any) => {
           </div>
 
           
-          <div className="flex items-center rounded-b-lg lg:w-6/12 lg:rounded-r-lg lg:rounded-bl-none bg-slate-500 rounded-md">
+          <div className="flex items-center rounded-b-lg lg:w-6/12 lg:rounded-r-lg lg:rounded-bl-none bg-slate-700 rounded-md">
            
             <div className="px-4 py-6 text-white md:mx-6 md:p-12">
               <h4 className="mb-6 text-4xl font-semibold">

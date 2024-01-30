@@ -16,9 +16,7 @@ function VoiceCloningModal({setOpenCloningModal}: any){
         const formData = new FormData();
         
         formData.append('voice_name', cloneData.voice_name);
-        formData.append('gender', cloneData.gender);
-      
-        if (Voicefile) formData.append('voice_file', Voicefile[0]);
+        if (Voicefile) formData.append('sample_file', Voicefile[0]);
 
         voiceClone(formData)
       
