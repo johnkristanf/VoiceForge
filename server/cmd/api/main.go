@@ -5,11 +5,15 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/johnkristanf/VoiceForge/server/auth"
 	"github.com/johnkristanf/VoiceForge/server/config"
 	"github.com/johnkristanf/VoiceForge/server/database"
 	"github.com/johnkristanf/VoiceForge/server/handlers"
 	"github.com/rs/cors"
 )
+
+
+
 
 func main() {
 
@@ -28,6 +32,11 @@ func main() {
 	client, err := config.RedisConfig()
 	if err != nil{
 		log.Fatalln("REDIS CONFIG ERROR", err)
+	}
+
+	smtpClient, err := auth.SmtpConfig()
+	if err != nil{
+		log.Fatalln("SMTP CONFIG ERROR", err)
 	}
 
 
@@ -49,7 +58,7 @@ func main() {
 	})
 
 	
-	server := handlers.NewAPIServer(":800", db, cors, client)
+	server := handlers.NewAPIServer(":800", db, cors, client, smtpClient)
 
 	if err := server.Run(); err != nil {
 		log.Fatalln("SERVER ERROR", err)
