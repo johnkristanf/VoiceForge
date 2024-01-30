@@ -5,7 +5,7 @@ function TextSpeech(){
 
     return(
         <div className="flex justify-center w-full h-screen">
-          <SideBar />
+          <SideBar  />
           <SpeechForm />
         </div>
        

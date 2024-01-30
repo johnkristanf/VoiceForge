@@ -9,7 +9,7 @@ type StreamBody struct {
 }
 
 type AudioStruct struct {
-	ID int64  `json:"audio_id"`
-	AudioStream []byte `json:"audioStream"`
-	AudioText   string `json:"audioText"`
+	ID           int64    `json:"audio_id"`
+	AudioStream  []byte   `json:"audioStream"`
+	AudioText    string   `json:"audioText"`
 }
