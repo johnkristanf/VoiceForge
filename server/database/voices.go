@@ -77,10 +77,14 @@ func (sql *SQL_DB) InsertVoice(voice *types.VoiceStruct) error{
 }
 
 
-func (sql *SQL_DB) Voices() ([]*types.FetchVoiceTypes, error) {
-	query := `SELECT id, name, sample, gender, accent, style, language, voice_engine FROM voices  WHERE id LIKE 's3%' limit 40;`
+func (sql *SQL_DB) Voices(search_voice string) ([]*types.FetchVoiceTypes, error) {
+	query := `SELECT id, name, sample, gender, accent, style, language, voice_engine FROM voices 
+	        WHERE 
+	            ($1 = 'all' OR name ILIKE $1 || '%')
+	            AND id LIKE 's3%' 
+                LIMIT 40;`
 
-	rows, err := sql.database.Query(query)
+	rows, err := sql.database.Query(query, search_voice)
 	if err != nil{
 		return nil, err
 	}
