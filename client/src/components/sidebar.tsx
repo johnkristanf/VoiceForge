@@ -1,7 +1,11 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faComments, faClone, faGear, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+import { faComments, faClone, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { FetchUserData, RefreshToken } from '../services/http/get/userData';
+import { UserData } from '../types/userData';
+import { Logout } from '../services/http/post/auth';
 
 export function SideBar(){
 
@@ -30,12 +34,27 @@ function Logo(){
 const link = [
     {name: "Text to Speech", to: "text-speech", icon: <FontAwesomeIcon icon={faComments}/> },
     {name: "Voice Cloning", to: "voice-cloning", icon: <FontAwesomeIcon icon={faClone}/> },
-    {name: "Settings", to: "settings", icon: <FontAwesomeIcon icon={faGear}/> }
 ]
 
 
 
 function SideBarLinks(){
+
+    const [UserData, setUserData] = useState<UserData>()
+    const [Unauthorized, setUnauthorized] = useState<boolean>(false);
+
+
+    useEffect(() => {
+
+        if(Unauthorized) RefreshToken().catch((err) => console.error(err))
+
+        FetchUserData(setUnauthorized).then((data: UserData) => {
+            setUserData(data)
+        })
+
+    }, [Unauthorized])
+
+
     
     return(
 
@@ -53,14 +72,14 @@ function SideBarLinks(){
             
         </ul>
 
-        <div className="flex bg-slate-700 absolute bottom-5  w-[80%] rounded-md text-white p-4 flex justify-around items-center ">
+        <div className="flex bg-slate-700 absolute bottom-5 right-0 w-[100%] rounded-md text-white p-4 flex justify-around items-center gap-4">
 
             <div className="flex items-center gap-3 text-lg font-bold" >
-               <img src="../../public/img/VF_logo.png" className="rounded-full" width={40}/>
-               <h1>John</h1> 
+               <img src="../../public/img/user.jpg" className="rounded-full" width={40}/>
+               <h1 className='truncate w-[80%]' >{UserData?.email}</h1> 
             </div>
            
-            <FontAwesomeIcon className='hover:opacity-75 hover:cursor-pointer text-xl' icon={faRightFromBracket}/>
+            <FontAwesomeIcon onClick={() => Logout()} className='hover:opacity-75 hover:cursor-pointer text-xl' icon={faRightFromBracket}/>
         </div>
 
     </>
