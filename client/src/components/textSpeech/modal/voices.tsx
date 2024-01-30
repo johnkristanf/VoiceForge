@@ -14,6 +14,7 @@ import '../../../../public/ScrollStyle.css';
 
 export function VoicesModal({selectedVoice, setselectedSpeed, setSelectedVoice, setOpenVoiceModal}: any){
 
+    const [SearchVoice, setSearchVoice] = useState<string>("all") 
   
     return(
         <>
@@ -28,14 +29,14 @@ export function VoicesModal({selectedVoice, setselectedSpeed, setSelectedVoice, 
                        className="absolute right-5 top-5 text-2xl font-bold text-white hover:opacity-75 hover:cursor-pointer" 
                        icon={faX}
                        onClick={() => setOpenVoiceModal(false)} 
-                       />
+                    />
 
                     <div className="flex justify-between w-[80%] mt-8">
-                      <SearchVoices />
+                      <SearchVoices setSearchVoice={setSearchVoice} />
                       <VoicesTypeBtn />
                     </div>
 
-                    <TableVoices setSelectedVoice={setSelectedVoice} />
+                    <TableVoices SearchVoice={SearchVoice} setSelectedVoice={setSelectedVoice} />
 
                     <VoiceInUse selectedVoice={selectedVoice} setselectedSpeed={setselectedSpeed}  setOpenVoiceModal={setOpenVoiceModal}/>
                   
@@ -48,10 +49,10 @@ export function VoicesModal({selectedVoice, setselectedSpeed, setSelectedVoice, 
 }
 
 
-function TableVoices({ setSelectedVoice }: any) {
+function TableVoices({ SearchVoice, setSelectedVoice }: any) {
 
-    const [AudioLoading,setAudioLoading] = useState<boolean>(false)
     const [voicesData, setVoicesData] = useState<VoiceTypes[]>();
+ 
 
     const [playingSample, setPlayingSample] = useState<string | null>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -66,14 +67,14 @@ function TableVoices({ setSelectedVoice }: any) {
     useEffect(() => {
       async function fetchVoices() {
         try {
-          setVoicesData(await getVoices());
+          setVoicesData(await getVoices(SearchVoice));
         } catch (error) {
           console.error(error);
         }
       }
   
       fetchVoices();
-    }, []);
+    }, [SearchVoice]);
   
     const sortedArr = sortVoiceNameinParam(voicesData);
   
@@ -150,7 +151,6 @@ function TableVoices({ setSelectedVoice }: any) {
                       onClick={() => handleAudioPlayPause(voice)}
                     > 
 
-                      {AudioLoading && <p className="text-red-800">Loading pa dol</p>}
 
                       <FontAwesomeIcon
                         icon={playingSample === voice.sample ? faPause : faPlay}
@@ -175,7 +175,7 @@ function TableVoices({ setSelectedVoice }: any) {
           </table>
 
         ) : (
-          <p className="text-white text-2xl">Loading...</p>
+          <p className="text-white text-2xl">No Search Result</p>
         )}
 
         <audio ref={audioRef} controls className="w-[20%] hidden" />
