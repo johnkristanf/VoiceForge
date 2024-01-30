@@ -6,7 +6,8 @@ export const fetchAudioData = async () => {
 
     try {
         const response = await axios.get(`http://localhost:800/api/audio/data`, {
-            responseType: 'json'
+            responseType: 'json',
+            withCredentials: true
         })
 
         if (response) return response.data
