@@ -11,13 +11,17 @@ import (
 
 type Method interface{
 	InsertVoice(*types.VoiceStruct) error
-	Voices() ([]*types.FetchVoiceTypes, error)
+	Voices(string) ([]*types.FetchVoiceTypes, error)
 
 	InsertAudioStream(string, *bytes.Buffer) error
 	FetchAudioStream() ([]*types.AudioStruct, error)
 	DeleteAudioData(int64) (int64, error)
 
 	SignUp(*types.SignupCredentials) error
+	CheckEmailExist(string) (*types.UserEmailExist, error)
+
+	VerifyUser(int64, string) error
+	
 }
 
 type SQL_DB struct{
@@ -73,6 +77,10 @@ func (sql *SQL_DB) DBInit() error {
 	}
 
 	if err := sql.CreateUserTable(); err != nil{
+		return err
+	}
+
+	if err := sql.CreateUserEmailIndex(); err != nil{
 		return err
 	}
 
