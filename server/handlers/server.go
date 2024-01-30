@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/johnkristanf/VoiceForge/server/auth"
 	"github.com/johnkristanf/VoiceForge/server/config"
 	"github.com/johnkristanf/VoiceForge/server/database"
 	"github.com/rs/cors"
@@ -19,10 +20,13 @@ type ApiServer struct{
 	database   database.Method
 	cors *cors.Cors
 	client config.RedisMethod
+	smtpClient auth.SmtpClientMethod
 }
 
 
 type APIFunction func (res http.ResponseWriter, req *http.Request) error
+
+
 
 func makeHTTPHandlerFunc(handlerFunc APIFunction) http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
@@ -34,12 +38,13 @@ func makeHTTPHandlerFunc(handlerFunc APIFunction) http.HandlerFunc {
 }
 
 
-func NewAPIServer(listenAddr string, db database.Method, cors *cors.Cors, client config.RedisMethod) *ApiServer {
+func NewAPIServer(listenAddr string, db database.Method, cors *cors.Cors, client config.RedisMethod, smtpClient auth.SmtpClientMethod) *ApiServer {
 	return &ApiServer{
 		listenAddr: listenAddr,
 		database: db,
 		cors: cors,
 		client: client,
+		smtpClient: smtpClient,
 	}
 }
 
@@ -51,16 +56,30 @@ func (s *ApiServer) Run() error {
 	requestHandler := s.cors.Handler(router) 
 
 	// GET HANDLER
-	router.HandleFunc("/api/audio/data", makeHTTPHandlerFunc(s.FetchAudioDataHandler))
-	router.HandleFunc("/api/voices", makeHTTPHandlerFunc(s.FetchVoicesHandler))
+	router.HandleFunc("/api/audio/data", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.FetchAudioDataHandler)))
+	router.HandleFunc("/api/voices/{search_voice}", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.FetchVoicesHandler)))
+
+	router.HandleFunc("/user/data", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.FetchUserDatahandler)))
+
 
 	// POST HANDLER
-	router.HandleFunc("/api/stream/voices", makeHTTPHandlerFunc(s.StreamAudioHandler))
-	router.HandleFunc("/api/voice/clone", makeHTTPHandlerFunc(s.VoiceCloneHandler))
+	router.HandleFunc("/api/stream/voices", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.StreamAudioHandler)))
+	router.HandleFunc("/api/voice/clone", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.VoiceCloneHandler)))
+
 	router.HandleFunc("/auth/signup", makeHTTPHandlerFunc(s.SignUpHandler))
+	router.HandleFunc("/auth/login", makeHTTPHandlerFunc(s.LoginHandler))
+	router.HandleFunc("/auth/verification", makeHTTPHandlerFunc(s.VerifyUserHandler))
+
+	router.HandleFunc("/logout", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.LogoutHandler)))
+
+
 
 	// DELETE HANDLER
-	router.HandleFunc("/api/audio/delete/{audio_id}", makeHTTPHandlerFunc(s.DeleteAudioDataHandler))
+	router.HandleFunc("/api/audio/delete/{audio_id}", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.DeleteAudioDataHandler)))
+
+
+	// TOKEN HANDLERS
+	router.HandleFunc("/token/refresh", s.RefreshTokenHandler)
 
 
 
