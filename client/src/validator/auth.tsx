@@ -1,7 +1,7 @@
 import { FieldErrors } from "react-hook-form"
-import { SignupCredentials } from "../types/auth"
+import { LoginCredentials, SignupCredentials } from "../types/auth"
 
-export const SignupValidation = (errors: FieldErrors<SignupCredentials>) => {
+export const SignupValidation = (errors: FieldErrors<SignupCredentials | LoginCredentials>) => {
 
     if (errors.email?.type === 'required') return <p className="text-red-800 text-center text-lg font-bold mb-3">Email is Required</p>
 
