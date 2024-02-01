@@ -22,8 +22,9 @@ export function SpeechForm() {
     voice: "s3://mockingbird-prod/charlotte_vo_narrative_9290be17-ccea-4700-a7fd-a8fe5c49fb20/voices/speaker/manifest.json",
     name: "Charlotte (Narrative)",
     output_format: "mp3"
-
   });
+
+  console.log("selectedVoice", selectedVoice)
 
   const [selectedSpeed, setselectedSpeed] = useState<string>("1");
   const [Text, setText] = useState<string>('');

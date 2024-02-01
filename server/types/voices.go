@@ -1,7 +1,5 @@
 package types
 
-import "mime/multipart"
-
 type VoiceStruct struct {
 	ID           string `json:"id"`
 	Name         string `json:"name"`
@@ -30,7 +28,10 @@ type FetchVoiceTypes struct {
 	VoiceEngine string `json:"voice_engine"`
 }
 
-type VoiceCloneTypes struct {
-    Voice_File *multipart.FileHeader `form:"voice_file" binding:"required"`
-    VoiceName string
+
+type VoiceCloneType struct{
+	ID   string  `json:"id"`
+	Name string  `json:"name"`
+	Type string  `json:"type"`
+	Voice_Engine string  `json:"voice_engine"`
 }

@@ -1,6 +1,6 @@
 import { SearchVoices } from "../../ui/input";
 import { VoicesTypeBtn } from "../../ui/button";
-import { getVoices } from "../../../services/http/get/voices";
+import { FetchVoiceClone, getVoices } from "../../../services/http/get/voices";
 import { VoiceTypes } from "../../../types/textSpeech";
 import { generateRandomString, generateArrayOfNumbers } from "../../../utils/randomGenerator";
 import { sortVoiceNameinParam } from "../../../utils/sort";
@@ -10,12 +10,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX, faPlay, faPause } from "@fortawesome/free-solid-svg-icons";
 
 import '../../../../public/ScrollStyle.css';
+import { VoiceCloneType } from "../../../types/voiceClone";
+
 
 
 export function VoicesModal({selectedVoice, setselectedSpeed, setSelectedVoice, setOpenVoiceModal}: any){
 
     const [SearchVoice, setSearchVoice] = useState<string>("all") 
-  
+    const [VoiceCloneTable, setVoiceCloneTable] = useState<boolean>(false)
+
     return(
         <>
         <div className="bg-gray-500 w-full h-screen fixed top-0 opacity-75"></div>
@@ -33,11 +36,15 @@ export function VoicesModal({selectedVoice, setselectedSpeed, setSelectedVoice, 
 
                     <div className="flex justify-between w-[80%] mt-8">
                       <SearchVoices setSearchVoice={setSearchVoice} />
-                      <VoicesTypeBtn />
+                      <VoicesTypeBtn setVoiceCloneTable={setVoiceCloneTable} />
                     </div>
 
-                    <TableVoices SearchVoice={SearchVoice} setSelectedVoice={setSelectedVoice} />
+                    {
+                      VoiceCloneTable ? <TableCloneVoices setSelectedVoice={setSelectedVoice}/>  
+                                      : <TableVoices SearchVoice={SearchVoice} setSelectedVoice={setSelectedVoice} />
 
+                    }
+                    
                     <VoiceInUse selectedVoice={selectedVoice} setselectedSpeed={setselectedSpeed}  setOpenVoiceModal={setOpenVoiceModal}/>
                   
                 </div>
@@ -182,7 +189,85 @@ function TableVoices({ SearchVoice, setSelectedVoice }: any) {
         
       </div>
     );
-  }
+}
+
+
+function TableCloneVoices({ setSelectedVoice }: any) {
+
+  const [CloneData, setCloneData] = useState<VoiceCloneType[]>()
+
+  useEffect(() => {
+    FetchVoiceClone().then((data: VoiceCloneType[]) => {
+      setCloneData(data)
+    })
+  }, [])
+  
+    const tHead = [
+      { name: "Name" },
+      { name: "Gender" },
+      { name: "Accent" },
+      { name: "Language" },
+    ];
+    
+      
+  
+    return (
+      <div className="h-[65%] w-full p-5 overflow-auto scrollable-container">
+
+        {CloneData ? (
+
+          <table className="text-white font-semibold text-center w-full border-collapse border border-slate-700">
+
+            <thead>
+              <tr>
+
+                {tHead.map((item) => (
+
+                  <th key={item.name} className="border-b border-slate-700">
+                    {item.name}
+                  </th>
+
+                ))}
+
+              </tr>
+            </thead>
+
+            <tbody>
+
+              {CloneData?.map((voice) => (
+                
+                <tr
+                  className="hover:bg-slate-800 hover:cursor-pointer"
+                  key={generateRandomString()}
+                  onClick={() => setSelectedVoice({voice: voice.id, name: voice.name, output_format: "mp3"})}
+                >
+                  <td className="py-5 flex gap-4 items-center justify-center"> 
+                          {voice.name} 
+                          <p className="bg-green-600 rounded-md p-1">Cloned</p>
+                  </td>
+
+                  <td className="py-5">N/A</td>
+                  <td className="py-5">N/A</td>
+                  <td className="py-5">N/A</td>
+
+                </tr>
+
+              ))}
+
+            </tbody>
+
+          </table>
+
+        ) : (
+          <p className="text-white text-2xl">No Search Result</p>
+        )}
+        
+      </div>
+    );
+
+
+}
+
 
 
 function VoiceInUse({ selectedVoice, setselectedSpeed, setOpenVoiceModal }: any) {

@@ -17,13 +17,14 @@ export function SpeechVoiceBtn({ selectedVoice, setOpenVoiceModal }: any){
     )
 }
 
-const vType = [
-    {name: "Pre-made", clicked: false},
-    {name: "Cloned", clicked: false}
-]
 
 
-export function VoicesTypeBtn(){
+export function VoicesTypeBtn({ setVoiceCloneTable }: any){
+
+    const vType = [
+        {name: "Pre-made", clicked: false, onClick: () => setVoiceCloneTable(false)},
+        {name: "Cloned", clicked: false, onClick: () => setVoiceCloneTable(true)}
+    ]
 
     return(
 
@@ -35,7 +36,9 @@ export function VoicesTypeBtn(){
                       className={
                         classNames(
                             item.clicked ? 'opacity-75' : 'bg-indigo-800 p-3 text-white font-bold rounded-md'
-                            )} 
+                        )}
+                        
+                        onClick={() => item.onClick()}
                       >
 
                       {item.name}
@@ -81,10 +84,10 @@ export function CreateNewCloneBtn({setOpenCloningModal}: any){
 
             <button 
                 onClick={() => setOpenCloningModal(true)}
-                className='p-5 w-[35%] bg-transparent rounded-md border bg-gray-800 flex justify-center items-center gap-3 font-semibold'
+                className='p-5 w-[35%] bg-transparent text-white rounded-md border bg-gray-800 flex justify-center items-center gap-3 font-semibold'
                 >
                 <FontAwesomeIcon className='bg-indigo-500 p-2 rounded-md' icon={faPlus}/> 
-                Create a New Clone
+                Create a Voice Clone
             </button>
 
         </div>
@@ -92,5 +95,5 @@ export function CreateNewCloneBtn({setOpenCloningModal}: any){
 }
 
 export function SubmitCloneBtn(){
-    return <button type='submit' className='p-3 w-full rounded-md mt-6 bg-indigo-700 hover:opacity-75'>Create</button>
+    return <button type='submit' className='p-3 w-full rounded-md mt-6 bg-indigo-700 hover:opacity-75 text-white font-semibold'>Create</button>
 }

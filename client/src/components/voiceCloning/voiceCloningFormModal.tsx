@@ -7,8 +7,11 @@ import { VoiceCloneInput } from "../../types/voiceClone";
 import { useState } from "react";
 import { voiceClone } from "../../services/http/post/voiceClone";
 
+import { useVoiceCloneData } from "../../services/context/voiceContext";
+
 function VoiceCloningModal({setOpenCloningModal}: any){
 
+    const { setVoiceCloneData } = useVoiceCloneData();
     const { register, reset, handleSubmit } = useForm<VoiceCloneInput>();
     const [Voicefile, setVoicefile] = useState<FileList>()
 
@@ -18,7 +21,11 @@ function VoiceCloningModal({setOpenCloningModal}: any){
         formData.append('voice_name', cloneData.voice_name);
         if (Voicefile) formData.append('sample_file', Voicefile[0]);
 
-        voiceClone(formData)
+        if(Voicefile) console.log("Voicefile[0]", Voicefile[0])
+
+        voiceClone(formData).then((data) => {
+            setVoiceCloneData(data)
+        })
       
         reset();
       };
@@ -28,7 +35,7 @@ function VoiceCloningModal({setOpenCloningModal}: any){
         <>
             <div className="bg-gray-500 w-full h-screen fixed top-0 opacity-75"></div>
 
-            <div className="w-full flex justify-center h-screen absolute top-0 py-6 ">
+            <div className="w-full flex justify-center h-screen absolute top-0 py-6">
 
                 <div className="bg-slate-950 h-[95%] w-[40%] flex flex-col items-center rounded-md pt-5 px-12 relative">
 

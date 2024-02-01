@@ -3,10 +3,10 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
+	"net/textproto"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -112,13 +112,15 @@ func (s *ApiServer) VoiceCloneHandler(res http.ResponseWriter, req *http.Request
 		return err
 	}
 
+	var voiceClone *types.VoiceCloneType
 	errorChan := make(chan error, 1)
 	respChan := make(chan []byte, 1)
 
-	err := req.ParseMultipartForm(50 << 20) 
+	err := req.ParseMultipartForm(10 << 20) 
     if err != nil {
         return err
     }
+
 
     voice_name := req.FormValue("voice_name")
 	sample_file, _, err := req.FormFile("sample_file")
@@ -126,7 +128,6 @@ func (s *ApiServer) VoiceCloneHandler(res http.ResponseWriter, req *http.Request
 		return err
 	}
 	defer sample_file.Close()
-
 
 
 	wg.Add(1)
@@ -139,12 +140,11 @@ func (s *ApiServer) VoiceCloneHandler(res http.ResponseWriter, req *http.Request
 			    errorChan <- err
 		    }
 
-			fmt.Println("Response from VoiceCloneRequest:", string(resp))
 			respChan <- resp
 	    }()
 
-
 	wg.Wait()  
+
 	close(errorChan)
 	close(respChan)
 
@@ -152,7 +152,11 @@ func (s *ApiServer) VoiceCloneHandler(res http.ResponseWriter, req *http.Request
 		return err
 	}
 
-	return nil
+	if err := json.Unmarshal(<- respChan, &voiceClone); err != nil{
+		return err
+	}
+
+	return utils.WriteJson(res, http.StatusOK, voiceClone)
 }
 
 func (s *ApiServer) VoiceCloneRequest(voice_name string, sample_file multipart.File) ([]byte, error) {
@@ -160,16 +164,19 @@ func (s *ApiServer) VoiceCloneRequest(voice_name string, sample_file multipart.F
 	var requestBody bytes.Buffer
 	formWriter := multipart.NewWriter(&requestBody)
 
-	fmt.Println("Voice Name sa request", voice_name)
-	fmt.Println("Voice File  sa request", sample_file)
-
+	if err := formWriter.SetBoundary("---011000010111000001101001"); err != nil{
+		return nil, err
+	}
 
 	if err := formWriter.WriteField("voice_name", voice_name); err != nil {
 		return nil, err
 	}
-	
 
-	fileWriter, err := formWriter.CreateFormFile("sample_file", "sample_file")
+	fileWriter, err := formWriter.CreatePart(textproto.MIMEHeader{
+		"Content-Disposition":   []string{`form-data; name="sample_file"; filename="sample_file.mp3"`},
+		"Content-Type":          []string{"audio/mpeg"},
+	})
+
 	if err != nil {
 		return nil, err
 	}
@@ -178,11 +185,8 @@ func (s *ApiServer) VoiceCloneRequest(voice_name string, sample_file multipart.F
 	if err != nil {
 		return nil, err
 	}
-
+	
 	formWriter.Close()
-
-	contentType := formWriter.FormDataContentType()
-    fmt.Println("Content-Type:", contentType)
 	
 	url := "https://api.play.ht/api/v2/cloned-voices/instant"
 	req, err := http.NewRequest("POST", url, &requestBody)
@@ -190,9 +194,8 @@ func (s *ApiServer) VoiceCloneRequest(voice_name string, sample_file multipart.F
 		return nil, err
 	}
 
-
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Content-Type", "multipart/form-data; boundary=---011000010111000001101001")
+	req.Header.Set("Content-Type", formWriter.FormDataContentType())
 	req.Header.Set("AUTHORIZATION", "e1f2dd6ceaa54658a0741be57e927cb6")
 	req.Header.Set("X-USER-ID", "5zqbxykOY0byMItNgL7YEjPsTNz1")
 
@@ -210,4 +213,41 @@ func (s *ApiServer) VoiceCloneRequest(voice_name string, sample_file multipart.F
 	}
 
 	return responseBody, nil
+}
+
+
+func (s *ApiServer) FetchVoiceClone(res http.ResponseWriter, req *http.Request) error {
+
+	if err := utils.HttpMethod(http.MethodGet, req); err != nil{
+		return err
+	}
+
+	var voiceClone []*types.VoiceCloneType
+	url := "https://api.play.ht/api/v2/cloned-voices"
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil{
+		return err
+	}
+
+	req.Header.Add("accept", "application/json")
+	req.Header.Add("AUTHORIZATION", "e1f2dd6ceaa54658a0741be57e927cb6")
+	req.Header.Add("X-USER-ID", "5zqbxykOY0byMItNgL7YEjPsTNz1")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil{
+		return err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil{
+		return err
+	}
+
+	if err := json.Unmarshal(body, &voiceClone); err != nil{
+		return err
+	}
+
+	return utils.WriteJson(res, http.StatusOK, voiceClone)
 }

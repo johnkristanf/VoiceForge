@@ -3,7 +3,8 @@ import { faComments, faClone, faRightFromBracket } from '@fortawesome/free-solid
 
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { FetchUserData, RefreshToken } from '../services/http/get/userData';
+import { FetchUserData } from '../services/http/get/userData';
+import { RefreshToken } from '../services/http/post/refreshToken';
 import { UserData } from '../types/userData';
 import { Logout } from '../services/http/post/auth';
 

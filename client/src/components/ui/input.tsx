@@ -46,7 +46,7 @@ export function VoiceCloningInput({ register, setVoicefile }: any){
         <div className="flex flex-col gap-8 mt-5">
 
             <div className="flex flex-col gap-2">
-                <h1 className='font-semibold'>Voice Name:</h1>
+                <h1 className='font-semibold text-white'>Voice Name:</h1>
                 <input 
                     type="text" 
                     className='p-4 border rounded-md font-bold' 
@@ -59,18 +59,18 @@ export function VoiceCloningInput({ register, setVoicefile }: any){
 
             <div className="flex flex-col gap-2">
 
-                <h1 className='font-semibold'>Upload High Quality Audio sample</h1>
+                <h1 className='font-semibold text-white'>Upload High Quality Audio sample</h1>
 
                 <button 
                   type='button'
                   onClick={() => handleButtonClick()}
-                  className=' bg-slate-800 p-3 rounded-md w-full flex flex-col items-center'
+                  className=' bg-slate-800 p-3 rounded-md w-full flex flex-col items-center text-white'
                   >
                     <FontAwesomeIcon icon={faCloudArrowUp}/>
                     Upload file here or browse
                 </button>
 
-                <p className='font-semibold opacity-75 text-sm'>
+                <p className='font-semibold opacity-75 text-sm text-white'>
                     Minimum file size: 5kb 
                     <br /> 
                     Maximum file size: 50mb

@@ -58,6 +58,8 @@ func (s *ApiServer) Run() error {
 	// GET HANDLER
 	router.HandleFunc("/api/audio/data", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.FetchAudioDataHandler)))
 	router.HandleFunc("/api/voices/{search_voice}", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.FetchVoicesHandler)))
+	router.HandleFunc("/api/get/voice/clone", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.FetchVoiceClone)))
+
 
 	router.HandleFunc("/user/data", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.FetchUserDatahandler)))
 

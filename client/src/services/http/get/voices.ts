@@ -17,3 +17,19 @@ export async function getVoices(SearchVoice: string) {
         console.error(error)
     }
 }
+
+
+export async function FetchVoiceClone() {
+
+    try {
+        const response = await axios.get(`http://localhost:800/api/get/voice/clone`, {
+            withCredentials: true
+        })
+        
+        console.log("res voice clone", response.data)
+        if (response) return response.data
+
+    } catch (error) {
+        console.error(error)
+    }
+}

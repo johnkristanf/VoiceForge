@@ -4,3 +4,10 @@ export type VoiceCloneInput = {
     gender: string
     voice_file: FileList
 }
+
+export type VoiceCloneType = {
+    id: string,
+    name: string,
+    type: string
+    voice_engine: string
+}
