@@ -8,7 +8,6 @@ export const FetchUserData = async (setUnauthorized: any) => {
             responseType: 'json',
             withCredentials: true
         })
-        console.log("user data:", response.data)
 
         return response.data
 

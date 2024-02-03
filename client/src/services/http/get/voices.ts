@@ -26,7 +26,6 @@ export async function FetchVoiceClone() {
             withCredentials: true
         })
         
-        console.log("res voice clone", response.data)
         if (response) return response.data
 
     } catch (error) {
