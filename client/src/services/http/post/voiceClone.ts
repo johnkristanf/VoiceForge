@@ -5,8 +5,6 @@ export const voiceClone = async (formData: FormData) => {
 
     try {
 
-        console.log('formData', formData)
-
         const response = await axios.post('http://localhost:800/api/voice/clone', formData , {
             withCredentials: true,
             headers: {
@@ -14,8 +12,32 @@ export const voiceClone = async (formData: FormData) => {
             }
         })
 
-        console.log('res clone', response)
+        if(response.data.id === '') return false
+        
+        return true
+
     } catch (error) {
         console.error(error)
     }
 }
+
+
+
+export const DeletevoiceClone = async (voice_id: string) => {
+
+    try {
+
+        const response = await axios.post('http://localhost:800/voice/clone/delete', { voice_id: voice_id } , {
+            withCredentials: true,
+            responseType: 'json'
+        })
+
+        if(response.data) return true
+
+        return false
+        
+    } catch (error) {
+        console.error(error)
+    }
+}
+ 
