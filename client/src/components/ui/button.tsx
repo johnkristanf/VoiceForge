@@ -52,12 +52,18 @@ export function VoicesTypeBtn({ setVoiceCloneTable }: any){
 
 
 
-export function GenerateSpeechBtn(){
+export function GenerateSpeechBtn({isSubmiting}: any){
 
 
     return(
         <div className="flex flex-col p-4 gap-3 bg-slate-900 w-[40%] h-[75%] rounded-md">
-            <button className="text-white font-semibold bg-indigo-800 w-full rounded-md p-5 hover:opacity-75">Generate Speech</button>
+            <button 
+                disabled={isSubmiting}
+                className={ isSubmiting ? "text-white font-semibold bg-gray-400 w-full rounded-md p-5 bg-gray-400 cursor-no-drop opacity-75"  
+                                        : "text-white font-semibold bg-indigo-800 w-full rounded-md p-5 hover:opacity-75"}>
+                Generate Speech
+            </button>
+
             <p className="text-white font-bold opacity-75 text-[12px]">Unleash the potential of text-to-speech innovation and share your message in a unique and engaging way</p>
         </div>
     )
@@ -94,6 +100,12 @@ export function CreateNewCloneBtn({setOpenCloningModal}: any){
     )
 }
 
-export function SubmitCloneBtn(){
-    return <button type='submit' className='p-3 w-full rounded-md mt-6 bg-indigo-700 hover:opacity-75 text-white font-semibold'>Create</button>
+export function SubmitCloneBtn({isSubmitting}: any){
+    return <button 
+               disabled={isSubmitting} 
+               type='submit' 
+               className={isSubmitting ? 'p-3 w-full rounded-md mt-6 bg-gray-400 hover:opacity-75 text-white font-semibold cursor-no-drop opacity-75' 
+                                       : 'p-3 w-full rounded-md mt-6 bg-indigo-700 hover:opacity-75 text-white font-semibold'}>
+                Create
+            </button>
 }
