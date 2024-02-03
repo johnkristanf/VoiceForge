@@ -73,7 +73,7 @@ function SideBarLinks(){
             
         </ul>
 
-        <div className="flex bg-slate-700 absolute bottom-5 right-0 w-[100%] rounded-md text-white p-4 flex justify-around items-center gap-4">
+        <div className="flex bg-slate-700 absolute bottom-5 right-4 w-[90%] rounded-md text-white p-4 flex justify-around items-center gap-4">
 
             <div className="flex items-center gap-3 text-lg font-bold" >
                <img src="../../public/img/user.jpg" className="rounded-full" width={40}/>
