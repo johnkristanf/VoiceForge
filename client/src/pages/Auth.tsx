@@ -38,7 +38,7 @@ const SignupForm = ({setSignup}: any) => {
 
   return(
       
-<section className="h-full bg-neutral-200 dark:bg-neutral-700">
+<section className="h-full">
 <div className="container h-full p-10">
   <div
     className="g-6 flex h-full flex-wrap items-center justify-center text-neutral-800 dark:text-neutral-200">
@@ -159,30 +159,34 @@ const LoginForm = ({setSignup}: any) => {
 
   const { register, reset, handleSubmit, formState: { errors } } = useForm<LoginCredentials>();
   const loginRef = useRef<HTMLParagraphElement | null>(null);
+  const [isSubmitting, setisSubmitting] = useState<boolean>(false)
 
   const onSubmit = async (loginCredentials: LoginCredentials) => {
 
+    setisSubmitting(true)
     const login = await Login(loginCredentials)
-    console.log('login res', login)
 
     if(login.Need_Verification){
       window.location.href = '/verify'
+      reset()
       return
     }
 
     if(login.Invalid_Credentials){
       if(loginRef.current) loginRef.current.textContent = login.Invalid_Credentials;
+      setisSubmitting(false)
       return
     }
 
     window.location.href = '/text-speech';
     reset()
+    setisSubmitting(false)
   }
 
 
   return(
       
-<section className="h-full bg-neutral-200 dark:bg-neutral-700">
+<section className="h-full">
 <div className="container h-full p-10">
   <div
     className="g-6 flex h-full flex-wrap items-center justify-center text-neutral-800 dark:text-neutral-200">
@@ -239,7 +243,10 @@ const LoginForm = ({setSignup}: any) => {
                
                 <div className="mb-12 pb-1 pt-1 text-center">
                   <button
-                    className="mb-3 inline-block w-full rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase bg-indigo-700 hover:opacity-75 leading-normal text-white shadow-[0_4px_9px_-4px_rgba(0,0,0,0.2)] transition duration-150 ease-in-out hover:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)] focus:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)] focus:outline-none focus:ring-0 active:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)]"
+                    disabled={isSubmitting}
+                    className={ isSubmitting ? "mb-3 inline-block w-full rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase bg-gray-400 cursor-no-drop opacity-75 leading-normal text-white shadow-[0_4px_9px_-4px_rgba(0,0,0,0.2)] transition duration-150 ease-in-out hover:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)] focus:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)] focus:outline-none focus:ring-0 active:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)]"
+                                 : "mb-3 inline-block w-full rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase bg-indigo-700 hover:opacity-75 leading-normal text-white shadow-[0_4px_9px_-4px_rgba(0,0,0,0.2)] transition duration-150 ease-in-out hover:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)] focus:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)] focus:outline-none focus:ring-0 active:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)]"
+                    }
                     type="submit"
                     data-te-ripple-init
                     data-te-ripple-color="light"
@@ -248,8 +255,7 @@ const LoginForm = ({setSignup}: any) => {
                     Log in
                   </button>
 
-                 
-                  <a href="#!">Forgot password?</a>
+                
                 </div>
 
                
