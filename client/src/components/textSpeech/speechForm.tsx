@@ -15,6 +15,7 @@ import '../../../public/ScrollStyle.css';
 
 export function SpeechForm() {
 
+  const [isSubmiting, setisSubmiting] = useState<boolean>(false);
   const [OpenVoiceModal, setOpenVoiceModal] = useState<boolean>(false);
   const [audioURL, setaudioURL] = useState<string>('')
   
@@ -24,7 +25,6 @@ export function SpeechForm() {
     output_format: "mp3"
   });
 
-  console.log("selectedVoice", selectedVoice)
 
   const [selectedSpeed, setselectedSpeed] = useState<string>("1");
   const [Text, setText] = useState<string>('');
@@ -39,14 +39,15 @@ export function SpeechForm() {
   const onSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    console.log("textToSpeechData", textToSpeechData);
+    setisSubmiting(true)
+
     const streamBlob = await streamAudio(textToSpeechData);
 
     if (streamBlob instanceof Blob) {
       const audioURL = URL.createObjectURL(streamBlob);
       setaudioURL(audioURL)
     }
-
+    setisSubmiting(false)
     setText('')
 
   };
@@ -64,7 +65,7 @@ export function SpeechForm() {
             <form onSubmit={onSubmit} className="w-full h-[40%] flex items-start gap-3 mb-3">
               <SpeechTextArea Text={Text} setText={setText} />
 
-              <GenerateSpeechBtn /> 
+              <GenerateSpeechBtn isSubmiting={isSubmiting} /> 
 
             </form>
 
@@ -103,6 +104,8 @@ function AudioPlayer({ audioURL }: any) {
       fetchData();
 
     }, [audioURL, deletedID]);
+
+    console.log("audioDataArray", audioDataArray)
 
 
 
