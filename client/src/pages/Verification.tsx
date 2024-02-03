@@ -32,14 +32,12 @@ const Verification = () => {
     const errorMsgRef = useRef<HTMLParagraphElement | null>(null);
 
     const onSubmit = async (codes: CodeTypes) => {
-        console.log('codes', codes)
 
         let verification_code = ""
         Object.values(codes).forEach(([value]) => {
             verification_code += value
         });
 
-        console.log("verification_code", verification_code)
 
         const verfied = await Verify(verification_code)
         reset();
@@ -56,9 +54,9 @@ const Verification = () => {
 
     return (
 
-        <div className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-gray-50 py-12">
+        <div className="relative flex min-h-screen flex-col justify-center overflow-hidden py-12">
                 
-        <div className="relative bg-indigo-700 px-6 pt-10 pb-9 shadow-xl mx-auto w-full max-w-lg rounded-2xl">
+        <div className="relative bg-indigo-900 px-6 pt-10 pb-9 shadow-xl mx-auto w-full max-w-lg rounded-2xl">
             <div className="mx-auto flex w-full max-w-md flex-col space-y-16">
             <div className="flex flex-col items-center justify-center text-center space-y-2">
                 <div className="font-semibold text-3xl">
