@@ -4,11 +4,8 @@ import (
 	"crypto/tls"
 	"fmt"
 	"log"
+	"os"
 	"net/smtp"
-
-	"crypto/rand"
-	"encoding/base64"
-
 	"github.com/johnkristanf/VoiceForge/server/utils"
 )
 
@@ -16,70 +13,74 @@ type SmtpClientMethod interface{
 	SendVerificationEmail(string) (int64, error)
 }
 
-type SmtpClient struct{
-	smtp *smtp.Client
+type SmtpClient struct {
+    host      string
+    port      string
+    password  string
+    from      string
+    smtp      *smtp.Client
 }
 
 var (
-
-	host = "smtp.gmail.com"
-    port = "465"
-	password = "bkzd cgbb wywn qmvi"
-	from = "johnkristan01@gmail.com"
-	tokenLength = 24
+	tokenLength = 5
 )
 
-func SmtpConfig() (*SmtpClient, error) {
+func NewSmtpClient() (*SmtpClient, error){
+
+	return &SmtpClient{
+		host: os.Getenv("SMTP_HOST"),
+		port: os.Getenv("SMTP_PORT"),
+		password: os.Getenv("SMTP_PASSWORD"),
+		from:  os.Getenv("SMTP_FROM"),
+	}, nil
+}
+
+func (s *SmtpClient) Connect() error {
 
 	TLSconfig := &tls.Config{
 		InsecureSkipVerify: true,
-		ServerName: host,
+		ServerName: s.host,
 	}
 
-	serverAddress := fmt.Sprintf("%s:%s", host, port)
+	serverAddress := fmt.Sprintf("%s:%s", s.host, s.port)
 
 	connection, err := tls.Dial("tcp", serverAddress, TLSconfig) 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	smtpClient, err := smtp.NewClient(connection, host)
+	smtpClient, err := smtp.NewClient(connection, s.host)
 	if err != nil{
 		log.Panic(err)
 	}
 
-	return &SmtpClient{
-		smtp: smtpClient,
-	}, nil
+	s.smtp = smtpClient
+	return nil
 }
 
-func GenerateRandomToken(length int) (string, error) {
-
-    token := make([]byte, length)
-
-    _, err := rand.Read(token)
-    if err != nil {
-        return "", err
+func (s *SmtpClient) Disconnect() {
+    if s.smtp != nil {
+        _ = s.smtp.Quit()
     }
-
-    
-    return base64.URLEncoding.EncodeToString(token)[:length], nil
 }
 
 
 func (s *SmtpClient) SendVerificationEmail(to string) (int64, error) {
 
-    verificationCode, err := utils.SecureRandomNumber(5)
+	if err := s.Connect(); err != nil {
+        return 0, err
+    }
+    defer s.Disconnect()
+
+    verificationCode, err := utils.SecureRandomNumber(tokenLength)
     if err != nil {
        return 0, err
     }
 
-	fmt.Println("verificationCode", verificationCode)
-
 	body := fmt.Sprintf("Your Verification Code:%d", verificationCode)
 
 	headers := map[string]string{
-		"From": from,
+		"From": s.from,
 		"To": to,
 		"Subject": "VoiceForge Email Verification",
 	}
@@ -90,14 +91,14 @@ func (s *SmtpClient) SendVerificationEmail(to string) (int64, error) {
 	}
 	message += "\r" + body
 
-	authenticate := smtp.PlainAuth("", from, password, host)
+	authenticate := smtp.PlainAuth("", s.from, s.password, s.host)
 
 
 	if err := s.smtp.Auth(authenticate); err != nil{
 		return 0, err
 	}
 
-	if err := s.smtp.Mail(from); err != nil{
+	if err := s.smtp.Mail(s.from); err != nil{
 		return 0, err
 	}
 
@@ -116,10 +117,6 @@ func (s *SmtpClient) SendVerificationEmail(to string) (int64, error) {
     }
 
 	if err := writer.Close(); err != nil{
-		return 0, err
-	}
-
-	if err := s.smtp.Quit(); err != nil{
 		return 0, err
 	}
 

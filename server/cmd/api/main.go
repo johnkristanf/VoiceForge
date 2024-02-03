@@ -5,10 +5,12 @@ import (
 	"log"
 	"net/http"
 
+
 	"github.com/johnkristanf/VoiceForge/server/auth"
 	"github.com/johnkristanf/VoiceForge/server/config"
 	"github.com/johnkristanf/VoiceForge/server/database"
 	"github.com/johnkristanf/VoiceForge/server/handlers"
+	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 )
 
@@ -16,6 +18,12 @@ import (
 
 
 func main() {
+
+
+	if err := godotenv.Load("../../.env"); err != nil {
+        log.Fatalf("Error loading .env file: %v", err)
+    }
+    
 
 	db, err := database.VoiceForgeDB()
 	if err != nil {
@@ -34,7 +42,8 @@ func main() {
 		log.Fatalln("REDIS CONFIG ERROR", err)
 	}
 
-	smtpClient, err := auth.SmtpConfig()
+
+	smtpClient, err := auth.NewSmtpClient()
 	if err != nil{
 		log.Fatalln("SMTP CONFIG ERROR", err)
 	}
