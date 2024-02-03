@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -10,9 +11,6 @@ import (
 )
 
 var (
-	accessTokenSecretKey = []byte("accessTokenKey")
-	refreshTokenSecretKey = []byte("refreshTokenKey")
-	verificationTokenSecretKey = []byte("verificationTokenKey")
 	accessTokenDuration   = 15 * time.Minute
 	refreshTokenDuration  = 3 * 24 * time.Hour
 )
@@ -26,7 +24,7 @@ func GenerateAccessToken(user_id int64, email string) (string, error) {
 	})
 
 
-	return token.SignedString(accessTokenSecretKey)
+	return token.SignedString([]byte(os.Getenv("ACCESS_TOKEN_JWTSECRET")))
 }
 
 
@@ -40,7 +38,7 @@ func GenerateVerificationToken(user_id int64, email string, hashedCode string) (
 	})
 
 
-	return token.SignedString(verificationTokenSecretKey)
+	return token.SignedString([]byte(os.Getenv("VERIFICATION_TOKEN_JWTSECRET")))
 }
 
 
@@ -52,7 +50,7 @@ func GenerateRefreshToken(user_id int64, email string) (string, error) {
 		"exp": time.Now().Add(refreshTokenDuration).Unix(),
 	})
 
-	return token.SignedString(refreshTokenSecretKey)
+	return token.SignedString([]byte(os.Getenv("REFRESH_TOKEN_JWTSECRET")))
 }
 
 
@@ -67,7 +65,7 @@ func AuthenticationMiddleWare(next http.HandlerFunc) http.HandlerFunc {
 	    }
 
 	    token, err := jwt.ParseWithClaims(cookie.Value, &types.JWTPayloadClaims{}, func(t *jwt.Token) (interface{}, error) {
-		    return accessTokenSecretKey, nil
+		    return []byte(os.Getenv("ACCESS_TOKEN_JWTSECRET")), nil
 	    })
 
 
