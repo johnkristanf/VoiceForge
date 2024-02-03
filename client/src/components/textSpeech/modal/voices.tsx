@@ -259,7 +259,7 @@ function TableCloneVoices({ setSelectedVoice }: any) {
           </table>
 
         ) : (
-          <p className="text-white text-2xl">No Search Result</p>
+          <p className="text-white text-2xl">Loading.....</p>
         )}
         
       </div>
