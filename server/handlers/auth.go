@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
+	"os"
 	"strconv"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/johnkristanf/VoiceForge/server/auth"
@@ -15,155 +16,124 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-
-
 func (s *ApiServer) SignUpHandler(res http.ResponseWriter, req *http.Request) error {
 
-	startTime := time.Now()
-
-	if err := utils.HttpMethod(http.MethodPost, req); err != nil{
+	if err := utils.HttpMethod(http.MethodPost, req); err != nil {
 		return err
 	}
 
 	var signUpCredentials *types.SignupCredentials
 
 	body, err := io.ReadAll(req.Body)
-	if err != nil{
+	if err != nil {
 		return err
 	}
 
-	if err := json.Unmarshal(body, &signUpCredentials); err != nil{
+	if err := json.Unmarshal(body, &signUpCredentials); err != nil {
 		return err
 	}
 
-	
-    if err := s.database.SignUp(signUpCredentials); err != nil {
-        return err
-	} 
-    
-	
-	utils.WriteJson(res, http.StatusOK, map[string]bool{"Signup": true})
+	if err := s.database.SignUp(signUpCredentials); err != nil {
+		return err
+	}
 
-	executionTime := time.Since(startTime)
-	fmt.Println("Exec Signup", executionTime.String())
-	return nil
-	
+	return utils.WriteJson(res, http.StatusOK, map[string]bool{"Signup": true})
+
 }
-
 
 func (s *ApiServer) LoginHandler(res http.ResponseWriter, req *http.Request) error {
 
-	if err := utils.HttpMethod(http.MethodPost, req); err != nil{
+	if err := utils.HttpMethod(http.MethodPost, req); err != nil {
 		return err
 	}
 
 	var loginCredentials *types.LoginCredentials
-
-	body, readErr := io.ReadAll(req.Body)
-	if readErr != nil{
-		return readErr
-	}
-
-	if err := json.Unmarshal(body, &loginCredentials); err != nil{
+	if err := json.NewDecoder(req.Body).Decode(&loginCredentials); err != nil {
 		return err
 	}
 
-
 	user, emailErr := s.database.CheckEmailExist(loginCredentials.Email)
-	if emailErr != nil{
+	if emailErr != nil {
 		return emailErr
 	}
 
-	if user == nil {
-		return utils.WriteJson(res, http.StatusNotFound, map[string]string{"Invalid_Credentials": "Incorrect Email or Password"})
-	}
-	
-
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginCredentials.Password)); err != nil{
+	if user == nil || bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginCredentials.Password)) != nil {
 		return utils.WriteJson(res, http.StatusNotFound, map[string]string{"Invalid_Credentials": "Incorrect Email or Password"})
 	}
 
+	if user.Verification_Token == "Not Yet Verified" {
 
-	if user.Verification_Token == "Not Yet Verified"{
-		
 		verificationCode, err := s.smtpClient.SendVerificationEmail(loginCredentials.Email)
-		if err != nil{
+		if err != nil {
 			return err
 		}
 
 		hashedCode, err := bcrypt.GenerateFromPassword([]byte(strconv.Itoa(int(verificationCode))), bcrypt.DefaultCost)
-		if err != nil{
+		if err != nil {
 			return err
 		}
-
+	
 		verificationToken, err := auth.GenerateVerificationToken(user.ID, user.Email, string(hashedCode))
-		if err != nil{
+		if err != nil {
 			return err
 		}
-
 
 		utils.SetCookie(res, verificationToken, time.Now().Add(15 * time.Minute), "Verification_Token")
 
 		return utils.WriteJson(res, http.StatusUnauthorized, map[string]bool{"Need_Verification": true})
-		
+
 	}
 
-
 	access_token, err := auth.GenerateAccessToken(user.ID, user.Email)
-	if err != nil{
+	if err != nil {
 		return err
 	}
 
 	refreshToken, refreshErr := auth.GenerateRefreshToken(user.ID, user.Email)
-	if refreshErr != nil{
+	if refreshErr != nil {
 		return refreshErr
 	}
 
-	utils.SetCookie(res, access_token, time.Now().Add(15 * time.Minute), "Access_Token")
+	utils.SetCookie(res, access_token, time.Now().Add(15*time.Minute), "Access_Token")
 
 	utils.SetCookie(res, refreshToken, time.Now().Add(3 * 24 * time.Hour), "Refresh_Token")
 
-	
 	return utils.WriteJson(res, http.StatusOK, map[string]bool{"Login": true})
 
 }
 
-
 func (s *ApiServer) FetchUserDatahandler(res http.ResponseWriter, req *http.Request) error {
 
-	if err := utils.HttpMethod(http.MethodGet, req); err != nil{
+	if err := utils.HttpMethod(http.MethodGet, req); err != nil {
 		return err
 	}
 
 	userPayload, ok := req.Context().Value("jwt_payload").(*types.JWTPayloadClaims)
-    if !ok {
-        return fmt.Errorf("failed to retrieve user data from context")
-    }
-	
+	if !ok {
+		return fmt.Errorf("failed to retrieve user data from context")
+	}
+
 	return utils.WriteJson(res, http.StatusOK, map[string]any{
 		"user_id": userPayload.ID,
-		"email"  : userPayload.Email,
+		"email":   userPayload.Email,
 	})
 }
 
-
-
 // --------------------------------TOKEN HANDLERS -----------------------------------------
-
 
 func (s *ApiServer) RefreshTokenHandler(res http.ResponseWriter, req *http.Request) {
 
 	refreshTokenCookie, err := req.Cookie("Refresh_Token")
-	if err != nil{
+	if err != nil {
 		utils.WriteJson(res, http.StatusUnauthorized, "Unauthorized: Refresh Token Not Found")
 		return
 	}
 
 	token, err := jwt.Parse(refreshTokenCookie.Value, func(token *jwt.Token) (interface{}, error) {
-		return []byte("refreshTokenKey"), nil
+		return []byte(os.Getenv("REFRESH_TOKEN_JWTSECRET")), nil
 	})
 
-	if err != nil || !token.Valid{
+	if err != nil || !token.Valid {
 		utils.WriteJson(res, http.StatusUnauthorized, "Unauthorized: Access is Denied Due to Invalid Credentials")
 		return
 	}
@@ -174,7 +144,6 @@ func (s *ApiServer) RefreshTokenHandler(res http.ResponseWriter, req *http.Reque
 		return
 	}
 
-	
 	userID := int64(claims["user_id"].(float64))
 	email := claims["email"].(string)
 
@@ -182,80 +151,91 @@ func (s *ApiServer) RefreshTokenHandler(res http.ResponseWriter, req *http.Reque
 	if err != nil {
 		utils.WriteJson(res, http.StatusUnauthorized, "Failed to generate access token")
 		return
-	} 
+	}
 
-
-	utils.SetCookie(res, access_token, time.Now().Add(15 * time.Minute), "Access_Token")
+	utils.SetCookie(res, access_token, time.Now().Add(15*time.Minute), "Access_Token")
 
 	utils.WriteJson(res, http.StatusOK, map[string]bool{"New Access Token Generated": true})
 
 }
 
-
 func (s *ApiServer) VerifyUserHandler(res http.ResponseWriter, req *http.Request) error {
 
-	if err := utils.HttpMethod(http.MethodPost, req); err != nil{
+	if err := utils.HttpMethod(http.MethodPost, req); err != nil {
 		return err
 	}
 
 	var code *types.VerificationCode
+	errorChan := make(chan error, 1)
 
 	codeCookie, err := req.Cookie("Verification_Token")
-	if err != nil{
+	if err != nil {
 		return utils.WriteJson(res, http.StatusUnauthorized, map[string]string{"ERROR": "Verification Token Not Found"})
 	}
 
 	userClaims, parseErr := ParseVerificationClaims(codeCookie)
-	if parseErr != nil{
-		return parseErr
+	if parseErr != nil {
+		return utils.WriteJson(res, http.StatusUnauthorized, map[string]string{"ERROR": parseErr.Error()})
 	}
 
 	body, readErr := io.ReadAll(req.Body)
-	if readErr != nil{
+	if readErr != nil {
 		return readErr
 	}
 
-	if err := json.Unmarshal(body, &code); err != nil{
+	if err := json.Unmarshal(body, &code); err != nil {
 		return err
 	}
 
-
-	if err := bcrypt.CompareHashAndPassword([]byte(userClaims.HashedCode), []byte(code.Code)); err != nil{
+	if err := bcrypt.CompareHashAndPassword([]byte(userClaims.HashedCode), []byte(code.Code)); err != nil {
 		return utils.WriteJson(res, http.StatusBadRequest, map[string]string{"ERROR": "Incorrect Verification Code"})
 	}
 
 	access_token, err := auth.GenerateAccessToken(userClaims.ID, userClaims.Email)
-	if err != nil{
+	if err != nil {
 		return err
 	}
 
 	refreshToken, refreshErr := auth.GenerateRefreshToken(userClaims.ID, userClaims.Email)
-	if refreshErr != nil{
+	if refreshErr != nil {
 		return refreshErr
 	}
 
-	utils.SetCookie(res, access_token, time.Now().Add(15 * time.Minute), "Access_Token")
+	utils.SetCookie(res, access_token, time.Now().Add(15*time.Minute), "Access_Token")
 
-	utils.SetCookie(res, refreshToken, time.Now().Add(3 * 24 * time.Hour), "Refresh_Token")
+	utils.SetCookie(res, refreshToken, time.Now().Add(3*24*time.Hour), "Refresh_Token")
 
+	go func() {
+		if err := s.database.VerifyUser(userClaims.ID, userClaims.HashedCode); err != nil {
+			errorChan <- err
+		}
+	}()
+	close(errorChan)
 
-	if err := s.database.VerifyUser(userClaims.ID, userClaims.HashedCode); err != nil{
+	if err := <-errorChan; err != nil {
 		return err
 	}
+
+	Verification_TokenCookie := &http.Cookie{
+		Name:    "Verification_Token",
+		Value:   "",
+		Expires: time.Now().AddDate(0, 0, -1),
+		Path:    "/",
+	}
+
+	http.SetCookie(res, Verification_TokenCookie)
 
 	return utils.WriteJson(res, http.StatusOK, map[string]bool{"Verified": true})
 
 }
 
-
 func ParseVerificationClaims(cookie *http.Cookie) (*types.ParseVerificationClaims, error) {
 
 	token, err := jwt.ParseWithClaims(cookie.Value, &types.ParseVerificationClaims{}, func(t *jwt.Token) (interface{}, error) {
-		return []byte("verificationTokenKey"), nil
+		return []byte(os.Getenv("VERIFICATION_TOKEN_JWTSECRET")), nil
 	})
 
-
-	if err != nil || !token.Valid{
+	if err != nil || !token.Valid {
 		return nil, fmt.Errorf("Unauthorized: Access is denied due to invalid credentials")
 	}
 
@@ -269,32 +249,31 @@ func ParseVerificationClaims(cookie *http.Cookie) (*types.ParseVerificationClaim
 	}
 
 	return &types.ParseVerificationClaims{
-		ID: user.ID,
-		Email: user.Email,
+		ID:         user.ID,
+		Email:      user.Email,
 		HashedCode: user.HashedCode,
 	}, nil
 
 }
 
-
 func (s *ApiServer) LogoutHandler(res http.ResponseWriter, req *http.Request) error {
 
-	if err := utils.HttpMethod(http.MethodPost, req); err != nil{
+	if err := utils.HttpMethod(http.MethodPost, req); err != nil {
 		return err
 	}
 
 	Access_TokenCookie := &http.Cookie{
-		Name:    "Access_Token", 
-		Value:   "",            
-		Expires: time.Now().AddDate(0, 0, -1), 
-		Path:    "/",         
+		Name:    "Access_Token",
+		Value:   "",
+		Expires: time.Now().AddDate(0, 0, -1),
+		Path:    "/",
 	}
 
 	Refresh_TokenCookie := &http.Cookie{
-		Name:    "Refresh_Token", 
-		Value:   "",            
-		Expires: time.Now().AddDate(0, 0, -1), 
-		Path:    "/",         
+		Name:    "Refresh_Token",
+		Value:   "",
+		Expires: time.Now().AddDate(0, 0, -1),
+		Path:    "/",
 	}
 
 	http.SetCookie(res, Access_TokenCookie)

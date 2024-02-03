@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"fmt"
+	"os"
 
 	"github.com/johnkristanf/VoiceForge/server/types"
 	_ "github.com/lib/pq"
@@ -32,15 +33,15 @@ type SQL_DB struct{
 func VoiceForgeDB() (*SQL_DB, error) {
 
 	var (
-		host = "localhost"
-		port = "5432"
+		host = os.Getenv("DB_HOST")
+		port = os.Getenv("DB_PORT")
 	
-		username = "postgres"
-		password = "johntorremocha"
+		username = os.Getenv("DB_USERNAME")
+		password = os.Getenv("DB_PASSWORD")
 	
-		dbname = "voiceforge"
-		sslmode = "disable"
-		connection_timeout = "10"
+		dbname = os.Getenv("DB_NAME")
+		sslmode = os.Getenv("DB_SSLMODE")
+		connection_timeout = os.Getenv("DB_CONNECTION_TIMEOUT")
 	)
 
 

@@ -7,6 +7,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
+	"os"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -29,8 +30,8 @@ func (s *ApiServer) FetchAndInsertVoicesInDBHandler(res http.ResponseWriter, req
 	}
 
 	httpReq.Header.Set("accept", "application/json")
-	httpReq.Header.Set("AUTHORIZATION", "dc23bdb0088e43d0ae92155f682d658b")
-	httpReq.Header.Set("X-USER-ID", "zXUVGgbbxFM42MjWQG3foHTHnLT2")
+	httpReq.Header.Set("AUTHORIZATION", os.Getenv("AUTHORIZATION_API_KEY"))
+	httpReq.Header.Set("X-USER-ID", os.Getenv("USER_API_KEY"))
 
 	client := &http.Client{}
     httpRes, err := client.Do(httpReq)
@@ -130,34 +131,37 @@ func (s *ApiServer) VoiceCloneHandler(res http.ResponseWriter, req *http.Request
 	defer sample_file.Close()
 
 
-	wg.Add(1)
+	go func() {
+		defer close(errorChan)
+		defer close(respChan)
 
-	    go func() {
-		    defer wg.Done()
+		resp, err := s.VoiceCloneRequest(voice_name, sample_file); 
+		if err != nil{
+			errorChan <- err
+		}
 
-		    resp, err := s.VoiceCloneRequest(voice_name, sample_file); 
-			if err != nil{
-			    errorChan <- err
+		respChan <- resp
+	}()
+
+	select {
+
+	    case err := <-errorChan:
+		    return err
+
+	    case responseBody := <-respChan:
+		
+		    if err := s.client.CacheSet(responseBody, "voiceCloneData"); err != nil {
+			    return err
 		    }
 
-			respChan <- resp
-	    }()
+		    if err := json.Unmarshal(responseBody, &voiceClone); err != nil{
+			    return err
+		    }
 
-	wg.Wait()  
-
-	close(errorChan)
-	close(respChan)
-
-	if err := <- errorChan; err != nil{
-		return err
+		    return utils.WriteJson(res, http.StatusOK, voiceClone)
 	}
-
-	if err := json.Unmarshal(<- respChan, &voiceClone); err != nil{
-		return err
-	}
-
-	return utils.WriteJson(res, http.StatusOK, voiceClone)
 }
+
 
 func (s *ApiServer) VoiceCloneRequest(voice_name string, sample_file multipart.File) ([]byte, error) {
 
@@ -196,8 +200,8 @@ func (s *ApiServer) VoiceCloneRequest(voice_name string, sample_file multipart.F
 
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", formWriter.FormDataContentType())
-	req.Header.Set("AUTHORIZATION", "e1f2dd6ceaa54658a0741be57e927cb6")
-	req.Header.Set("X-USER-ID", "5zqbxykOY0byMItNgL7YEjPsTNz1")
+	req.Header.Set("AUTHORIZATION", os.Getenv("AUTHORIZATION_API_KEY"))
+	req.Header.Set("X-USER-ID", os.Getenv("USER_API_KEY"))
 
 
 	resp, err := http.DefaultClient.Do(req)
@@ -223,16 +227,20 @@ func (s *ApiServer) FetchVoiceClone(res http.ResponseWriter, req *http.Request) 
 	}
 
 	var voiceClone []*types.VoiceCloneType
-	url := "https://api.play.ht/api/v2/cloned-voices"
 
+	if cacheErr := s.client.CacheGet("voiceCloneData", &voiceClone); cacheErr == nil {
+		return utils.WriteJson(res, http.StatusOK, voiceClone)
+	}
+
+	url := "https://api.play.ht/api/v2/cloned-voices"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil{
 		return err
 	}
 
 	req.Header.Add("accept", "application/json")
-	req.Header.Add("AUTHORIZATION", "e1f2dd6ceaa54658a0741be57e927cb6")
-	req.Header.Add("X-USER-ID", "5zqbxykOY0byMItNgL7YEjPsTNz1")
+	req.Header.Add("AUTHORIZATION", os.Getenv("AUTHORIZATION_API_KEY"))
+	req.Header.Add("X-USER-ID", os.Getenv("USER_API_KEY"))
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil{
@@ -240,14 +248,76 @@ func (s *ApiServer) FetchVoiceClone(res http.ResponseWriter, req *http.Request) 
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil{
+
+	if err := json.NewDecoder(resp.Body).Decode(&voiceClone); err != nil{
 		return err
 	}
 
-	if err := json.Unmarshal(body, &voiceClone); err != nil{
+	if err := s.client.CacheSet(voiceClone, "voiceCloneData"); err != nil{
 		return err
 	}
 
 	return utils.WriteJson(res, http.StatusOK, voiceClone)
 }
+
+
+type VoiceID struct{
+	VoiceID string `json:"voice_id"`
+}
+
+func (s *ApiServer) DeleteVoiceClone(res http.ResponseWriter, req *http.Request) error {
+
+	if err := utils.HttpMethod(http.MethodPost, req); err != nil{
+		return err
+	}
+
+	var clone *VoiceID
+
+	body, err := io.ReadAll(req.Body)
+	if err != nil{
+		return err
+	}
+
+	if err := json.Unmarshal(body, &clone); err != nil{
+		return err
+	}
+
+
+	jsonBody, err := json.Marshal(clone);
+	if err != nil{
+		return err
+	}
+
+	url := "https://api.play.ht/api/v2/cloned-voices/"
+
+	delrequest, err := http.NewRequest("DELETE", url, bytes.NewBuffer(jsonBody))
+	if err != nil{
+		return  err
+	}
+	
+	delrequest.Header.Add("Accept", "application/json")
+	delrequest.Header.Add("Content-Type", "application/json")
+	delrequest.Header.Add("AUTHORIZATION", os.Getenv("AUTHORIZATION_API_KEY"))
+	delrequest.Header.Add("X-USER-ID", os.Getenv("USER_API_KEY"))
+
+	
+	resp, err := http.DefaultClient.Do(delrequest)
+	if err != nil{
+		return err
+	}
+	defer resp.Body.Close()
+
+
+	readBody, err := io.ReadAll(resp.Body)
+	if err != nil{
+		return  err
+	}
+
+	if err := s.client.CacheDelete("voiceCloneData"); err != nil{
+		return err
+	}
+
+	return utils.WriteJson(res, http.StatusOK, string(readBody))
+}
+
+

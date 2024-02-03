@@ -67,7 +67,8 @@ func (s *ApiServer) Run() error {
 	// POST HANDLER
 	router.HandleFunc("/api/stream/voices", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.StreamAudioHandler)))
 	router.HandleFunc("/api/voice/clone", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.VoiceCloneHandler)))
-
+	router.HandleFunc("/voice/clone/delete", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.DeleteVoiceClone)))
+	
 	router.HandleFunc("/auth/signup", makeHTTPHandlerFunc(s.SignUpHandler))
 	router.HandleFunc("/auth/login", makeHTTPHandlerFunc(s.LoginHandler))
 	router.HandleFunc("/auth/verification", makeHTTPHandlerFunc(s.VerifyUserHandler))
@@ -79,7 +80,6 @@ func (s *ApiServer) Run() error {
 	// DELETE HANDLER
 	router.HandleFunc("/api/audio/delete/{audio_id}", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.DeleteAudioDataHandler)))
 
-
 	// TOKEN HANDLERS
 	router.HandleFunc("/token/refresh", s.RefreshTokenHandler)
 
@@ -88,8 +88,6 @@ func (s *ApiServer) Run() error {
 	if err := http.ListenAndServe(s.listenAddr, requestHandler); err != nil{
 		return err
 	}
-
-	log.Println("Server Running on Port", s.listenAddr)
 
 	return nil
 }

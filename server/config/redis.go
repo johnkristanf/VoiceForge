@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"time"
+	"os"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -24,8 +25,8 @@ type RedisMethod interface{
 func RedisConfig() (*Redis, error) {
 
 	client := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379", 
-		Password: "",               
+		Addr:     os.Getenv("REDIS_ADDRESS"), 
+		Password: os.Getenv("REDIS_PASSWORD"),               
 		DB:       0,              
 	})
 
@@ -36,6 +37,7 @@ func RedisConfig() (*Redis, error) {
 
 
 func (r *Redis) CacheSet(cachedData interface{}, cacheKey string) error {
+	
 	jsonData, err := json.Marshal(cachedData)
 	if err != nil{
 		return err
