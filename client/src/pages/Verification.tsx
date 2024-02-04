@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Verify } from "../services/http/post/auth";
 import { useRef } from "react";
 
+import { useUserData } from "../services/context/voiceContext"; 
+
 function classNames(...classes: any) {
    return classes.filter(Boolean).join(' ');
 }
@@ -30,6 +32,9 @@ const Verification = () => {
     const { register, reset, handleSubmit} = useForm<CodeTypes>();
     const navigate = useNavigate()
     const errorMsgRef = useRef<HTMLParagraphElement | null>(null);
+    const { EmailVerfication } = useUserData()
+
+    console.log("EmailVerfication", EmailVerfication)
 
     const onSubmit = async (codes: CodeTypes) => {
 
@@ -47,9 +52,7 @@ const Verification = () => {
             return
         }
 
-        navigate("/text-speech")
-
-       
+        navigate("/text-speech")       
     }
 
     return (
@@ -63,7 +66,7 @@ const Verification = () => {
                 <p>Email Verification</p>
                 </div>
                 <div className="flex flex-row text-sm font-medium text-gray-400">
-                <p>We have sent a code to your email ba**@dipainhouse.com</p>
+                <p>We have sent a code to your email {EmailVerfication}</p>
                 </div>
             </div>
 

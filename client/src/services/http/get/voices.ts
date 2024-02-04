@@ -8,9 +8,6 @@ export async function getVoices(SearchVoice: string) {
             withCredentials: true
         })
 
-        console.log('SearchVoice', SearchVoice)
-        
-        console.log("res voice", response.data)
         if (response) return response.data.voices
 
     } catch (error) {

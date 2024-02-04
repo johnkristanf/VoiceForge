@@ -1,25 +1,25 @@
 import { createContext, useContext, useState, ReactNode, Dispatch, SetStateAction } from 'react';
 
 interface VoiceCloneContextType {
-    voiceCloneData: any; // Change 'any' to the type of your voiceCloneData
-    setVoiceCloneData: Dispatch<SetStateAction<any>>; // Change 'any' to the type of your voiceCloneData
+    EmailVerfication: string; // Change 'any' to the type of your voiceCloneData
+    setEmailVerfication: Dispatch<SetStateAction<string>>; // Change 'any' to the type of your voiceCloneData
 }
 
 const defaultVoiceCloneContext: VoiceCloneContextType = {
-    voiceCloneData: null,
-    setVoiceCloneData: () => {},
+    EmailVerfication: '',
+    setEmailVerfication: () => {},
 };
 
-const VoiceCloneDataContext = createContext<VoiceCloneContextType>(defaultVoiceCloneContext);
+const UserDataContext = createContext<VoiceCloneContextType>(defaultVoiceCloneContext);
 
-export const useVoiceCloneData = () => useContext(VoiceCloneDataContext);
+export const useUserData = () => useContext(UserDataContext);
 
-export const VoiceCloneDataProvider = ({ children }: { children: ReactNode }) => {
-    const [voiceCloneData, setVoiceCloneData] = useState<any>(null); // Change 'any' to the type of your voiceCloneData
+export const UserDataProvider = ({ children }: { children: ReactNode }) => {
+    const [EmailVerfication, setEmailVerfication] = useState<string>(''); // Change 'any' to the type of your voiceCloneData
 
     return (
-        <VoiceCloneDataContext.Provider value={{ voiceCloneData, setVoiceCloneData }}>
+        <UserDataContext.Provider value={{ EmailVerfication, setEmailVerfication }}>
             {children}
-        </VoiceCloneDataContext.Provider>
+        </UserDataContext.Provider>
     );
 };

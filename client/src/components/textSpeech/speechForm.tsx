@@ -105,9 +105,6 @@ function AudioPlayer({ audioURL }: any) {
 
     }, [audioURL, deletedID]);
 
-    console.log("audioDataArray", audioDataArray)
-
-
 
   return (
 

@@ -4,6 +4,8 @@ import { LoginCredentials, SignupCredentials, validEmail } from "../types/auth";
 import { SignupValidation } from "../validator/auth";
 import { Login, Signup } from "../services/http/post/auth";
 
+import { useUserData } from "../services/context/voiceContext"; 
+
 const Auth: React.FC  = () => {
   const [Signup, setSignup] = useState<boolean>(false);
 
@@ -160,13 +162,16 @@ const LoginForm = ({setSignup}: any) => {
   const { register, reset, handleSubmit, formState: { errors } } = useForm<LoginCredentials>();
   const loginRef = useRef<HTMLParagraphElement | null>(null);
   const [isSubmitting, setisSubmitting] = useState<boolean>(false)
+  const { setEmailVerfication } = useUserData()
 
   const onSubmit = async (loginCredentials: LoginCredentials) => {
 
     setisSubmitting(true)
+    
     const login = await Login(loginCredentials)
 
     if(login.Need_Verification){
+      setEmailVerfication(loginCredentials.email);
       window.location.href = '/verify'
       reset()
       return
