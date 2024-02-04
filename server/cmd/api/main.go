@@ -1,10 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
-
 
 	"github.com/johnkristanf/VoiceForge/server/auth"
 	"github.com/johnkristanf/VoiceForge/server/config"
@@ -33,8 +31,6 @@ func main() {
 	if err := db.DBInit(); err != nil {
 		log.Fatalln("DATABASE TABLES ERROR", err.Error())
 	}
-
-	fmt.Printf("%v+\n", db)
 
 
 	client, err := config.RedisConfig()
