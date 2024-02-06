@@ -94,7 +94,7 @@ func (s *ApiServer) LoginHandler(res http.ResponseWriter, req *http.Request) err
 		return refreshErr
 	}
 
-	utils.SetCookie(res, access_token, time.Now().Add(15*time.Minute), "Access_Token")
+	utils.SetCookie(res, access_token, time.Now().Add(15 * time.Minute), "Access_Token")
 
 	utils.SetCookie(res, refreshToken, time.Now().Add(3 * 24 * time.Hour), "Refresh_Token")
 

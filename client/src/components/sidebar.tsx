@@ -62,7 +62,7 @@ function SideBarLinks(){
     <>
         <ul className="text-white font-bold text-lg">
 
-            {
+        {
                 link.map((item) => (
 
                     <Link key={item.name} to={`/${item.to}`}><li className="mt-10 hover:opacity-100 hover:cursor-pointer opacity-75">
