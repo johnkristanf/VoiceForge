@@ -61,6 +61,8 @@ func (s *ApiServer) LoginHandler(res http.ResponseWriter, req *http.Request) err
 		return utils.WriteJson(res, http.StatusNotFound, map[string]string{"Invalid_Credentials": "Incorrect Email or Password"})
 	}
 
+	fmt.Println("user", user.Verification_Token)
+
 	if user.Verification_Token == "Not Yet Verified" {
 
 		verificationCode, err := s.smtpClient.SendVerificationEmail(loginCredentials.Email)
