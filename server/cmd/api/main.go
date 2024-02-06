@@ -52,7 +52,7 @@ func main() {
 	}
 
 	cors := cors.New(cors.Options{
-		AllowedOrigins: []string{"http://localhost:500"},
+		AllowedOrigins: []string{"https://voice-forge-client.vercel.app"},
 
 		AllowedMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
 
