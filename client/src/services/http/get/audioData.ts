@@ -5,7 +5,7 @@ export const fetchAudioData = async () => {
 
 
     try {
-        const response = await axios.get(`http://localhost:800/api/audio/data`, {
+        const response = await axios.get(`https://voiceforge-server.onrender.com/api/audio/data`, {
             responseType: 'json',
             withCredentials: true
         })

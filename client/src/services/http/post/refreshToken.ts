@@ -3,7 +3,7 @@ import axios from "axios";
 export const RefreshToken = async () => {
 
     try {
-            const response = await axios.post('http://localhost:800/token/refresh', {}, {
+            const response = await axios.post('https://voiceforge-server.onrender.com/token/refresh', {}, {
                 withCredentials: true,
             });
 

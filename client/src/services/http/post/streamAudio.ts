@@ -5,7 +5,7 @@ export const streamAudio = async (data: TextToSpeech): Promise<Blob | undefined>
     
     try {
 
-        const res = await axios.post("http://localhost:800/api/stream/voices", data, {
+        const res = await axios.post("https://voiceforge-server.onrender.com/api/stream/voices", data, {
           responseType: 'blob',
           withCredentials: true
         })

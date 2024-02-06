@@ -5,7 +5,7 @@ export const voiceClone = async (formData: FormData) => {
 
     try {
 
-        const response = await axios.post('http://localhost:800/api/voice/clone', formData , {
+        const response = await axios.post('https://voiceforge-server.onrender.com/api/voice/clone', formData , {
             withCredentials: true,
             headers: {
                 'Content-Type': 'multipart/form-data'
@@ -27,7 +27,7 @@ export const DeletevoiceClone = async (voice_id: string) => {
 
     try {
 
-        const response = await axios.post('http://localhost:800/voice/clone/delete', { voice_id: voice_id } , {
+        const response = await axios.post('https://voiceforge-server.onrender.com/voice/clone/delete', { voice_id: voice_id } , {
             withCredentials: true,
             responseType: 'json'
         })
