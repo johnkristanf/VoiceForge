@@ -81,8 +81,7 @@ func (s *ApiServer) FetchVoicesHandler(res http.ResponseWriter, req *http.Reques
 		    "executionTime cached": executionTime.String(),
 	    }
 
-	    utils.WriteJson(res, http.StatusOK, resMap)
-		return nil
+	    return utils.WriteJson(res, http.StatusOK, resMap)
 	}
 
 	voices, err := s.database.Voices(search_voice) 
@@ -101,9 +100,8 @@ func (s *ApiServer) FetchVoicesHandler(res http.ResponseWriter, req *http.Reques
 		"executionTime uncached": executionTime.String(),
 	}
 
-	utils.WriteJson(res, http.StatusOK, resMap)
+	return utils.WriteJson(res, http.StatusOK, resMap)
 
-	return nil
 }
 
 
@@ -150,7 +148,7 @@ func (s *ApiServer) VoiceCloneHandler(res http.ResponseWriter, req *http.Request
 
 	    case responseBody := <-respChan:
 		
-		    if err := s.client.CacheSet(responseBody, "voiceCloneData"); err != nil {
+		    if err := s.client.CacheDelete("voiceCloneData"); err != nil {
 			    return err
 		    }
 

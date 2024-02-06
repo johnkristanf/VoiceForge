@@ -27,7 +27,6 @@ type ApiServer struct{
 type APIFunction func (res http.ResponseWriter, req *http.Request) error
 
 
-
 func makeHTTPHandlerFunc(handlerFunc APIFunction) http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
 
