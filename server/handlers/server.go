@@ -8,7 +8,6 @@ import (
 	"github.com/johnkristanf/VoiceForge/server/auth"
 	"github.com/johnkristanf/VoiceForge/server/config"
 	"github.com/johnkristanf/VoiceForge/server/database"
-	"github.com/rs/cors"
 )
 
 type APIError struct{
@@ -18,7 +17,6 @@ type APIError struct{
 type ApiServer struct{
 	listenAddr string
 	database   database.Method
-	cors *cors.Cors
 	client config.RedisMethod
 	smtpClient auth.SmtpClientMethod
 }
@@ -37,11 +35,10 @@ func makeHTTPHandlerFunc(handlerFunc APIFunction) http.HandlerFunc {
 }
 
 
-func NewAPIServer(listenAddr string, db database.Method, cors *cors.Cors, client config.RedisMethod, smtpClient auth.SmtpClientMethod) *ApiServer {
+func NewAPIServer(listenAddr string, db database.Method, client config.RedisMethod, smtpClient auth.SmtpClientMethod) *ApiServer {
 	return &ApiServer{
 		listenAddr: listenAddr,
 		database: db,
-		cors: cors,
 		client: client,
 		smtpClient: smtpClient,
 	}
@@ -51,8 +48,6 @@ func NewAPIServer(listenAddr string, db database.Method, cors *cors.Cors, client
 func (s *ApiServer) Run() error {
 
 	router := mux.NewRouter()
-
-	requestHandler := s.cors.Handler(router) 
 
 	// GET HANDLER
 	router.HandleFunc("/api/audio/data", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.FetchAudioDataHandler)))
@@ -84,7 +79,7 @@ func (s *ApiServer) Run() error {
 
 
 
-	if err := http.ListenAndServe(s.listenAddr, requestHandler); err != nil{
+	if err := http.ListenAndServe(s.listenAddr, router); err != nil{
 		return err
 	}
 
