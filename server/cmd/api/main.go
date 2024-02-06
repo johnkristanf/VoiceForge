@@ -48,6 +48,7 @@ func main() {
 		AllowedOrigins:     []string{"https://voiceforge.vercel.app"},
 		AllowedMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
 		AllowCredentials:   true,
+		
 		AllowedHeaders: []string{
 			"Access-Control-Allow-Credentials",
 			"Access-Control-Allow-Origin",
