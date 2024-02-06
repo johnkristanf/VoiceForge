@@ -16,13 +16,6 @@ import (
 
 func main() {
 
-	fmt.Println("MING GANA NA ANG DOCKER liboga uyy")
-
-	fmt.Println("DATABASE_URL", os.Getenv("DATABASE_URL"))
-	fmt.Println("REDIS_URL", os.Getenv("REDIS_URL"))
-
-
-
 
 	if err := godotenv.Load(".env"); err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
@@ -53,10 +46,14 @@ func main() {
 
 	cors := cors.New(cors.Options{
 		AllowedOrigins:     []string{"https://voiceforge.vercel.app"},
-        AllowedMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
-        AllowCredentials:   true,
-        AllowedHeaders:     []string{"*"},
+		AllowedMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
+		AllowCredentials:   true,
+		AllowedHeaders:     []string{"*"}, // Allow all headers
+		Debug:              true,          // Enable debug mode for verbose logging
 	})
+
+	fmt.Println("ang cors gi ilisan nmo dol")
+
 
 	server := handlers.NewAPIServer(fmt.Sprintf(":%s", os.Getenv("SERVER_PORT")), db, cors, client, smtpClient)
 

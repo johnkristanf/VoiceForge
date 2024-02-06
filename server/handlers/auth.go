@@ -80,7 +80,7 @@ func (s *ApiServer) LoginHandler(res http.ResponseWriter, req *http.Request) err
 			return err
 		}
 
-		utils.SetCookie(res, verificationToken, time.Now().Add(15*time.Minute), "Verification_Token")
+		utils.SetCookie(res, verificationToken, time.Now().Add(15 * time.Minute), "Verification_Token")
 
 		return utils.WriteJson(res, http.StatusUnauthorized, map[string]bool{"Need_Verification": true})
 
