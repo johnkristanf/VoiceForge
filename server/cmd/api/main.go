@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/johnkristanf/VoiceForge/server/auth"
@@ -10,6 +11,7 @@ import (
 	"github.com/johnkristanf/VoiceForge/server/database"
 	"github.com/johnkristanf/VoiceForge/server/handlers"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -42,11 +44,19 @@ func main() {
 		log.Fatalln("SMTP CONFIG ERROR", err)
 	}
 
+	cors := cors.New(cors.Options{
+		AllowedOrigins:     []string{"https://voiceforge.vercel.app"},
+		AllowedMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
+		AllowCredentials:   true,
+		
+		AllowedHeaders: []string{"*"},
+		
+	})
 
-	fmt.Println("bag o dooo babye cors")
+	fmt.Println("bag o dooo")
 
 
-	server := handlers.NewAPIServer(fmt.Sprintf(":%s", os.Getenv("SERVER_PORT")), db, client, smtpClient)
+	server := handlers.NewAPIServer(fmt.Sprintf(":%s", os.Getenv("SERVER_PORT")), db, cors, client, smtpClient)
 
 	fmt.Println("port", os.Getenv("SERVER_PORT"))
 	
