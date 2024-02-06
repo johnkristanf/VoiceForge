@@ -48,11 +48,18 @@ func main() {
 		AllowedOrigins:     []string{"https://voiceforge.vercel.app"},
 		AllowedMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
 		AllowCredentials:   true,
-		AllowedHeaders:     []string{"*"}, // Allow all headers
-		Debug:              true,          // Enable debug mode for verbose logging
+		AllowedHeaders: []string{
+			"Access-Control-Allow-Credentials",
+			"Access-Control-Allow-Origin",
+			"Access-Control-Allow-Headers",
+			"Content-Type",
+			"Origin",
+			"Cookie",
+		},
+		
 	})
 
-	fmt.Println("ang cors gi ilisan nmo dol")
+	fmt.Println("bag o dooo")
 
 
 	server := handlers.NewAPIServer(fmt.Sprintf(":%s", os.Getenv("SERVER_PORT")), db, cors, client, smtpClient)
