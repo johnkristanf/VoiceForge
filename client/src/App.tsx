@@ -20,9 +20,9 @@ const App = () => {
 
          <Routes>
             <Route path="/" Component={Auth} />
-            <Route path="verify" Component={Verification} /> 
-            <Route path="text-speech" Component={TextSpeech} />
-            <Route path="voice-cloning" Component={VoiceCloning} />
+            <Route path="/verify" Component={Verification} /> 
+            <Route path="/text-speech" Component={TextSpeech} />
+            <Route path="/voice-cloning" Component={VoiceCloning} />
 
          </Routes>
 
