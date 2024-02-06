@@ -25,7 +25,7 @@ function Logo(){
 
     return(
             <div className="flex items-center gap-3">
-                <img src="./public/img/VF_logo.png" className="rounded-full" width={50}/>
+                <img src="https://voiceforge.vercel.app/public/img/VF_logo.png" className="rounded-full" width={50}/>
                 <h1 className="text-3xl text-white font-semibold">VoiceForge</h1>
             </div>       
     )
@@ -76,7 +76,7 @@ function SideBarLinks(){
         <div className="flex bg-slate-700 absolute bottom-5 right-4 w-[90%] rounded-md text-white p-4 flex justify-around items-center gap-4">
 
             <div className="flex items-center gap-3 text-lg font-bold" >
-               <img src="./public/img/user.jpg" className="rounded-full" width={40}/>
+               <img src="https://voiceforge.vercel.app/public/img/user.jpg" className="rounded-full" width={40}/>
                <h1 className='truncate w-[80%]' >{UserData?.email}</h1> 
             </div>
            
