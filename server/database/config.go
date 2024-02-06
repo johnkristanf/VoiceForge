@@ -3,7 +3,6 @@ package database
 import (
 	"bytes"
 	"database/sql"
-	"fmt"
 	"os"
 
 	"github.com/johnkristanf/VoiceForge/server/types"
@@ -45,7 +44,6 @@ func VoiceForgeDB() (*SQL_DB, error) {
 	// connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s connect_timeout=%s",
 	// 	host, port, username, password, dbname, sslmode, connection_timeout)
 
-	fmt.Println("DB_URL sa .ENV", os.Getenv("DATABASE_URL"))
 	connStr := os.Getenv("DATABASE_URL")
 
 	db, err := sql.Open("postgres", connStr)

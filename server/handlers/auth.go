@@ -63,7 +63,7 @@ func (s *ApiServer) LoginHandler(res http.ResponseWriter, req *http.Request) err
 
 	fmt.Println("user", user.Verification_Token)
 
-	if user.Verification_Token == "Not Yet Verified" {
+	if user.Verification_Token == "Unverified" {
 
 		verificationCode, err := s.smtpClient.SendVerificationEmail(loginCredentials.Email)
 		if err != nil {
@@ -74,13 +74,13 @@ func (s *ApiServer) LoginHandler(res http.ResponseWriter, req *http.Request) err
 		if err != nil {
 			return err
 		}
-	
+
 		verificationToken, err := auth.GenerateVerificationToken(user.ID, user.Email, string(hashedCode))
 		if err != nil {
 			return err
 		}
 
-		utils.SetCookie(res, verificationToken, time.Now().Add(15 * time.Minute), "Verification_Token")
+		utils.SetCookie(res, verificationToken, time.Now().Add(15*time.Minute), "Verification_Token")
 
 		return utils.WriteJson(res, http.StatusUnauthorized, map[string]bool{"Need_Verification": true})
 
