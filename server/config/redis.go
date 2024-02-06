@@ -3,9 +3,10 @@ package config
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/url"
 	"time"
-	"fmt"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -23,7 +24,6 @@ type RedisMethod interface {
 }
 
 func RedisConfig(redisURL string) (*Redis, error) {
-
 	u, err := url.Parse(redisURL)
 	if err != nil {
 		return nil, err
@@ -34,17 +34,36 @@ func RedisConfig(redisURL string) (*Redis, error) {
 
 	password, _ := u.User.Password()
 
+	var client *redis.Client
 
-	client := redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%s", host, port) ,
-		Password: password,
-		DB:       0,
-	})
+	// Function to establish a new connection to Redis
+	connectToRedis := func() (*redis.Client, error) {
+		return redis.NewClient(&redis.Options{
+			Addr:     fmt.Sprintf("%s:%s", host, port),
+			Password: password,
+			DB:       0,
+			OnConnect: func(ctx context.Context, cn *redis.Conn) error {
+				log.Println("Successfully reconnected to Redis.")
+				return nil
+			},
+		}), nil
+	}
+	
+
+	// Create a new Redis client
+	client, err = connectToRedis()
+	if err != nil {
+		return nil, err
+	}
+
+	// Test the connection to Redis
+	if _, err := client.Ping(ctx).Result(); err != nil {
+		return nil, err
+	}
 
 	return &Redis{
 		client: client,
 	}, nil
-
 }
 
 func (r *Redis) CacheSet(cachedData interface{}, cacheKey string) error {
