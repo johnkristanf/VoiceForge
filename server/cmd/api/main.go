@@ -16,6 +16,10 @@ import (
 
 func main() {
 
+	// ANIMAL NGA REDIS UY MAG BUG JUD BASTA I DEPLOY NA I DEBUG NI UGMA
+	
+	log.Println("AYAW KONEK MEGOOOO")
+
 
 	if err := godotenv.Load(".env"); err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
@@ -52,9 +56,6 @@ func main() {
 		AllowedHeaders: []string{"*"},
 		
 	})
-
-	fmt.Println("bag o dooo")
-
 
 	server := handlers.NewAPIServer(fmt.Sprintf(":%s", os.Getenv("SERVER_PORT")), db, cors, client, smtpClient)
 

@@ -4,7 +4,7 @@ export const FetchUserData = async (setUnauthorized: any) => {
 
     try {
 
-        const response = await axios.get("https://voiceforge-server.onrender.com/user/data", {
+        const response = await axios.get("http://locahost:800/user/data", {
             responseType: 'json',
             withCredentials: true
         })

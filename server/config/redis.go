@@ -15,15 +15,16 @@ type Redis struct {
 	client *redis.Client
 }
 
-var ctx = context.Background()
-
 type RedisMethod interface {
 	CacheSet(interface{}, string) error
 	CacheGet(string, interface{}) error
 	CacheDelete(string) error
 }
 
+var ctx = context.Background()
+
 func RedisConfig(redisURL string) (*Redis, error) {
+
 	u, err := url.Parse(redisURL)
 	if err != nil {
 		return nil, err
@@ -33,6 +34,13 @@ func RedisConfig(redisURL string) (*Redis, error) {
 	port := u.Port()
 
 	password, _ := u.User.Password()
+
+	log.Println("redisURL", redisURL)
+	log.Println("host", host)
+	log.Println("port", port)
+	log.Println("password", password)
+
+
 
 	var client *redis.Client
 
@@ -48,18 +56,45 @@ func RedisConfig(redisURL string) (*Redis, error) {
 			},
 		}), nil
 	}
-	
 
-	// Create a new Redis client
 	client, err = connectToRedis()
 	if err != nil {
 		return nil, err
 	}
 
-	// Test the connection to Redis
-	if _, err := client.Ping(ctx).Result(); err != nil {
+	// TEST CONNECTION TO THE REDIS SERVER
+	pong, err := client.Ping(ctx).Result(); 
+	if err != nil {
 		return nil, err
 	}
+
+	log.Println("CONNECT NIMAL", pong)
+
+
+	go func() {
+
+		for {
+
+			if _, err := client.Ping(ctx).Result(); err != nil {
+				log.Println("CONNECTION LOST ATTEMPTING TO RECONNECT....")
+
+				newClient, reConnErr := connectToRedis()
+
+				if reConnErr != nil {
+					log.Printf("FAILED TO CONNECT TO THE REDIS SERVER: %v \n", reConnErr)
+					time.Sleep(5 * time.Second)
+					continue
+				}
+
+				client = newClient
+
+				log.Println("Successfully reconnected to Redis.")
+
+			}
+
+			time.Sleep(1 * time.Minute)
+		}
+	}()
 
 	return &Redis{
 		client: client,
