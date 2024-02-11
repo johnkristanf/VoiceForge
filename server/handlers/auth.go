@@ -61,8 +61,6 @@ func (s *ApiServer) LoginHandler(res http.ResponseWriter, req *http.Request) err
 		return utils.WriteJson(res, http.StatusNotFound, map[string]string{"Invalid_Credentials": "Incorrect Email or Password"})
 	}
 
-	fmt.Println("user", user.Verification_Token)
-
 	if user.Verification_Token == "Unverified" {
 
 		verificationCode, err := s.smtpClient.SendVerificationEmail(loginCredentials.Email)
@@ -121,6 +119,7 @@ func (s *ApiServer) FetchUserDatahandler(res http.ResponseWriter, req *http.Requ
 	})
 }
 
+
 // --------------------------------TOKEN HANDLERS -----------------------------------------
 
 func (s *ApiServer) RefreshTokenHandler(res http.ResponseWriter, req *http.Request) {
@@ -157,7 +156,7 @@ func (s *ApiServer) RefreshTokenHandler(res http.ResponseWriter, req *http.Reque
 
 	utils.SetCookie(res, access_token, time.Now().Add(15*time.Minute), "Access_Token")
 
-	utils.WriteJson(res, http.StatusOK, map[string]bool{"New Access Token Generated": true})
+	utils.WriteJson(res, http.StatusOK, map[string]bool{"New_Access_Token_Generated": true})
 
 }
 

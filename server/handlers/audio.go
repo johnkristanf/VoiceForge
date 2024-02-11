@@ -17,6 +17,9 @@ import (
 
 var wg sync.WaitGroup
 
+
+// NAAY POSIBLE ERROR DIRI CALLED &{context deadline exceeded} KAY PAG GENERATE NKOG SPEECH MING GAWAS NA
+
 func (s *ApiServer) StreamAudioHandler(res http.ResponseWriter, req *http.Request) error {
 
 	if err := utils.HttpMethod(http.MethodPost, req); err != nil {
@@ -156,7 +159,5 @@ func (s *ApiServer) DeleteAudioDataHandler(res http.ResponseWriter, req *http.Re
 		return err
 	}
 
-	utils.WriteJson(res, http.StatusOK, map[string]int64{"DELETED": deletedID})
-
-	return nil
+	return utils.WriteJson(res, http.StatusOK, map[string]int64{"DELETED": deletedID})
 }
