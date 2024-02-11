@@ -22,6 +22,18 @@ func (s *ApiServer) FetchAndInsertVoicesInDBHandler(res http.ResponseWriter, req
 		return err
 	}
 
+
+	val, err := s.database.CheckVoicesValues()
+	if err != nil{
+		return err
+	}
+
+	if val > 0 {
+		return utils.WriteJson(res, http.StatusBadRequest, map[string]string{
+			"ERROR": "Unable to perform Action",
+		})
+	}
+
 	url := "https://api.play.ht/api/v2/voices"
 
 	httpReq, err := http.NewRequest(http.MethodGet, url, nil)
@@ -70,8 +82,11 @@ func (s *ApiServer) FetchVoicesHandler(res http.ResponseWriter, req *http.Reques
 		return err
 	}
 
+	var voiceChan = make(chan []*types.FetchVoiceTypes, 1)
+	var errorChan = make(chan error, 1)
+
 	search_voice := mux.Vars(req)["search_voice"] 
-	var voiceCached []*types.VoiceStruct
+	var voiceCached []*types.FetchVoiceTypes
 
 	if cacheErr := s.client.CacheGet(search_voice, &voiceCached); cacheErr == nil{
 		executionTime := time.Since(startTime)
@@ -84,23 +99,40 @@ func (s *ApiServer) FetchVoicesHandler(res http.ResponseWriter, req *http.Reques
 	    return utils.WriteJson(res, http.StatusOK, resMap)
 	}
 
-	voices, err := s.database.Voices(search_voice) 
-	if err != nil{
-		return err
-	}
-	
 
-	if err := s.client.CacheSet(voices, search_voice); err != nil{
-		return err
-	}
+	go func() {
+		defer close(errorChan)
+		defer close(voiceChan)
 
-	executionTime := time.Since(startTime)
-	resMap := map[string]any{
-		"voices": voices, 
-		"executionTime uncached": executionTime.String(),
-	}
+		voices, err := s.database.Voices(search_voice) 
+		if err != nil{
+			errorChan <- err
+		}
 
-	return utils.WriteJson(res, http.StatusOK, resMap)
+		voiceChan <- voices
+
+	}()
+
+
+	select{
+
+	    case err := <- errorChan:
+			return err 
+		
+		case voices := <- voiceChan:
+
+			if err := s.client.CacheSet(voices, search_voice); err != nil{
+				return err
+			}
+		
+			executionTime := time.Since(startTime)
+			resMap := map[string]any{
+				"voices": voices, 
+				"executionTime uncached": executionTime.String(),
+			}
+		
+			return utils.WriteJson(res, http.StatusOK, resMap)
+	}
 
 }
 

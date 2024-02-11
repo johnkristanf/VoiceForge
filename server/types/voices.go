@@ -24,7 +24,6 @@ type FetchVoiceTypes struct {
 	Gender      string `json:"gender" `
 	Accent      string `json:"accent"`
 	Language    string `json:"language" `
-	Style       string `json:"style"`
 	VoiceEngine string `json:"voice_engine"`
 }
 

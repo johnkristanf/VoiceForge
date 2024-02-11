@@ -39,86 +39,98 @@ func (sql *SQL_DB) CreateVoiceIndex() error {
 	query := "CREATE INDEX IF NOT EXISTS idx_voice_name ON voices (name);"
 
 	_, err := sql.database.Exec(query)
-	if err != nil{
+	if err != nil {
 		return err
 	}
 
 	return nil
 }
 
-
-func (sql *SQL_DB) InsertVoice(voice *types.VoiceStruct) error{
+func (sql *SQL_DB) InsertVoice(voice *types.VoiceStruct) error {
+	
 	query := `INSERT INTO voices(
 		id, name, sample, accent, age, gender, language, language_code, loudness, style, tempo, texture, is_cloned, voice_engine)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14);`
 
-	_, err := sql.database.Exec(query, 
-	                        voice.ID,
-							voice.Name,
-							voice.Sample,
-							voice.Accent,
-							voice.Age,
-							voice.Gender,
-							voice.Language,
-							voice.LanguageCode,
-							voice.Loudness,
-							voice.Style,
-							voice.Tempo,
-							voice.Texture,
-							voice.IsCloned,
-							voice.VoiceEngine,
-						)
+	_, err := sql.database.Exec(query,
+		voice.ID,
+		voice.Name,
+		voice.Sample,
+		voice.Accent,
+		voice.Age,
+		voice.Gender,
+		voice.Language,
+		voice.LanguageCode,
+		voice.Loudness,
+		voice.Style,
+		voice.Tempo,
+		voice.Texture,
+		voice.IsCloned,
+		voice.VoiceEngine,
+	)
 
-	if err != nil{
+	if err != nil {
 		return err
-	}	
+	}
 
 	return nil
 }
 
+func (sql *SQL_DB) CheckVoicesValues() (int, error) {
+	
+	query := "SELECT COUNT(id) FROM voices"
+
+	var count int
+	if err := sql.database.QueryRow(query).Scan(&count); err != nil{
+		return -100, err
+	}
+
+	return count, nil
+	
+}
 
 func (sql *SQL_DB) Voices(search_voice string) ([]*types.FetchVoiceTypes, error) {
-	query := `SELECT id, name, sample, gender, accent, style, language, voice_engine FROM voices 
+
+	query := `SELECT id, name, sample, gender, accent, language, voice_engine FROM voices 
 	        WHERE 
 	            ($1 = 'all' OR name ILIKE $1 || '%')
 	            AND id LIKE 's3%' 
                 LIMIT 40;`
 
 	rows, err := sql.database.Query(query, search_voice)
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 
 	var fetchVoices []*types.FetchVoiceTypes
 
-	for rows.Next(){
+	for rows.Next() {
+
 		fields, err := voicesScantoRows(rows)
-		if err != nil{
+		if err != nil {
 			return nil, err
 		}
-		
+
 		fetchVoices = append(fetchVoices, fields)
 	}
 
 	return fetchVoices, nil
 }
 
-
-func voicesScantoRows(rows *sql.Rows) (*types.FetchVoiceTypes, error){
+func voicesScantoRows(rows *sql.Rows) (*types.FetchVoiceTypes, error) {
 	fields := &types.FetchVoiceTypes{}
-	
+
 	err := rows.Scan(
 		&fields.ID,
 		&fields.Name,
 		&fields.Sample,
 		&fields.Gender,
 		&fields.Accent,
-		&fields.Style,
 		&fields.Language,
 		&fields.VoiceEngine,
 	)
 
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 
