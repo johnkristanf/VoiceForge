@@ -4,7 +4,7 @@ import { LoginCredentials, SignupCredentials } from "../../../types/auth";
 export const Signup = async (signupCredentials: SignupCredentials) => {
 
     try {
-        const response = await axios.post("http://locahost:800/auth/signup", signupCredentials, {
+        const response = await axios.post("http://localhost:800/auth/signup", signupCredentials, {
             responseType: 'json'
         })
 
@@ -20,7 +20,7 @@ export const Login = async (loginCredentials: LoginCredentials) => {
 
     try {
 
-        const response = await axios.post("http://locahost:800/auth/login", loginCredentials, {
+        const response = await axios.post("http://localhost:800/auth/login", loginCredentials, {
             responseType: 'json',
             withCredentials: true
         })

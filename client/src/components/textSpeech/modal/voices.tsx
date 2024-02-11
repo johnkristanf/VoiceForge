@@ -124,66 +124,72 @@ function TableVoices({ SearchVoice, setSelectedVoice }: any) {
     return (
       <div className="h-[65%] w-full p-5 overflow-auto scrollable-container">
 
-        {sortedArr ? (
+            {voicesData && voicesData == null ? (
+                <p className="text-white text-2xl">No search results</p>
 
-          <table className="text-white font-semibold text-center w-full border-collapse border border-slate-700">
+            ) : sortedArr ? (
+              
+                <table className="text-white font-semibold text-center w-full border-collapse border border-slate-700">
 
-            <thead>
-              <tr>
+                    <thead>
+                      <tr>
 
-                {tHead.map((item) => (
+                        {tHead.map((item) => (
 
-                  <th key={item.name} className="border-b border-slate-700">
-                    {item.name}
-                  </th>
+                          <th key={item.name} className="border-b border-slate-700">
+                            {item.name}
+                          </th>
 
-                ))}
+                          ))}
 
-              </tr>
-            </thead>
+                      </tr>
+                    </thead>
 
-            <tbody>
+                    <tbody>
 
-              {sortedArr?.map((voice) => (
+                      {sortedArr?.map((voice) => (
                 
-                <tr
-                  className="hover:bg-slate-800 hover:cursor-pointer"
-                  key={generateRandomString()}
-                  onClick={() => setSelectedVoice({voice: voice.id, name: voice.name, output_format: "mp3"})}
-                >
-                  <td className="py-5">
+                        <tr
+                         className="hover:bg-slate-800 hover:cursor-pointer"
+                          key={generateRandomString()}
+                          onClick={() => setSelectedVoice({voice: voice.id, name: voice.name, output_format: "mp3"})}
+                        >
+                          <td className="py-5">
 
-                    <button
-                      className="w-[10%] bg-gray-400 p-1 text-center rounded-full mr-5 hover:opacity-75"
-                      onClick={() => handleAudioPlayPause(voice)}
-                    > 
+                            <button
+                              className="w-[10%] bg-gray-400 p-1 text-center rounded-full mr-5 hover:opacity-75"
+                              onClick={() => handleAudioPlayPause(voice)}
+                            > 
 
 
-                      <FontAwesomeIcon
-                        icon={playingSample === voice.sample ? faPause : faPlay}
-                      />
+                              <FontAwesomeIcon
+                                icon={playingSample === voice.sample ? faPause : faPlay}
+                              />
 
-                    </button>
+                            </button>
 
-                    {voice.name}
+                            {voice.name}
 
-                  </td>
+                          </td>
 
-                  <td className="py-5">{voice.gender.charAt(0).toUpperCase() + voice.gender.slice(1)}</td>
-                  <td className="py-5">{voice.accent.charAt(0).toUpperCase() + voice.accent.slice(1)}</td>
-                  <td className="py-5">{voice.language}</td>
+                          <td className="py-5">{voice.gender.charAt(0).toUpperCase() + voice.gender.slice(1)}</td>
+                          <td className="py-5">{voice.accent.charAt(0).toUpperCase() + voice.accent.slice(1)}</td>
+                          <td className="py-5">{voice.language}</td>
 
-                </tr>
+                        </tr>
 
-              ))}
+                      ))}
 
-            </tbody>
+                    </tbody>
 
-          </table>
 
-        ) : (
-          <p className="text-white text-2xl">No Search Result</p>
-        )}
+                </table>
+
+            ) : (
+                <p className="text-white text-2xl">Loading...</p>
+            )}
+
+        
 
         <audio ref={audioRef} controls className="w-[20%] hidden" />
         

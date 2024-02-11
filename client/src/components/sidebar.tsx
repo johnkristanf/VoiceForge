@@ -43,17 +43,24 @@ function SideBarLinks(){
 
     const [UserData, setUserData] = useState<UserData>()
     const [Unauthorized, setUnauthorized] = useState<boolean>(false);
-
+    const [Token, setToken] = useState<boolean | undefined>(false)
 
     useEffect(() => {
 
-        if(Unauthorized) RefreshToken().catch((err) => console.error(err))
+        async function token() {
+            const token = await RefreshToken()
+            setToken(token)
+        }
+
+        if (Unauthorized) token()
 
         FetchUserData(setUnauthorized).then((data: UserData) => {
             setUserData(data)
         })
 
     }, [Unauthorized])
+
+    if(Token) window.location.href = '/text-speech'
 
 
     

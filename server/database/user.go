@@ -1,7 +1,6 @@
 package database
 
 import (
-	 
 	"github.com/johnkristanf/VoiceForge/server/types"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -23,8 +22,8 @@ func (sql *SQL_DB) CreateUserTable() error {
 }
 
 
-func (sql *SQL_DB) CreateUserEmailIndex() error {
-    query := `CREATE INDEX IF NOT EXISTS idx_userEmail ON "user" (email);`
+func (sql *SQL_DB) CreateUserCredentialsIndex() error {
+    query := `CREATE INDEX IF NOT EXISTS idx_userCredentials ON "user" (email, user_id);`
 
     _, err := sql.database.Exec(query)
     if err != nil {

@@ -13,7 +13,6 @@ export type VoiceTypes = {
   gender: string,
   language: string
   id: string
-  style: string
   sample: string
 }
 
