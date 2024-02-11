@@ -27,7 +27,6 @@ type ApiServer struct{
 type APIFunction func (res http.ResponseWriter, req *http.Request) error
 
 
-
 func makeHTTPHandlerFunc(handlerFunc APIFunction) http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
 
@@ -59,7 +58,7 @@ func (s *ApiServer) Run() error {
 	router.HandleFunc("/api/audio/data", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.FetchAudioDataHandler)))
 	router.HandleFunc("/api/voices/{search_voice}", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.FetchVoicesHandler)))
 	router.HandleFunc("/api/get/voice/clone", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.FetchVoiceClone)))
-
+	router.HandleFunc("/api/insert/voice", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.FetchAndInsertVoicesInDBHandler)))
 
 	router.HandleFunc("/user/data", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.FetchUserDatahandler)))
 
@@ -80,6 +79,7 @@ func (s *ApiServer) Run() error {
 	// DELETE HANDLER
 	router.HandleFunc("/api/audio/delete/{audio_id}", auth.AuthenticationMiddleWare(makeHTTPHandlerFunc(s.DeleteAudioDataHandler)))
 
+	
 	// TOKEN HANDLERS
 	router.HandleFunc("/token/refresh", s.RefreshTokenHandler)
 

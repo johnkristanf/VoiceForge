@@ -10,6 +10,7 @@ import (
 )
 
 type Method interface {
+	CheckVoicesValues() (int, error)
 	InsertVoice(*types.VoiceStruct) error
 	Voices(string) ([]*types.FetchVoiceTypes, error)
 
@@ -55,6 +56,9 @@ func VoiceForgeDB() (*SQL_DB, error) {
 		return nil, err
 	}
 
+	db.SetMaxOpenConns(3)
+	db.SetMaxIdleConns(3)
+
 	return &SQL_DB{database: db}, nil
 
 }
@@ -77,7 +81,7 @@ func (sql *SQL_DB) DBInit() error {
 		return err
 	}
 
-	if err := sql.CreateUserEmailIndex(); err != nil {
+	if err := sql.CreateUserCredentialsIndex(); err != nil {
 		return err
 	}
 
