@@ -8,6 +8,8 @@ import (
 	"net/url"
 	"time"
 
+	"crypto/tls"
+
 	"github.com/go-redis/redis/v8"
 )
 
@@ -30,30 +32,29 @@ func RedisConfig(redisURL string) (*Redis, error) {
 		return nil, err
 	}
 
-	host := u.Hostname()
-	port := u.Port()
-
-	password, _ := u.User.Password()
-
-	log.Println("redisURL", redisURL)
-	log.Println("host", host)
-	log.Println("port", port)
-	log.Println("password", password)
-
-
-
 	var client *redis.Client
 
-	// Function to establish a new connection to Redis
 	connectToRedis := func() (*redis.Client, error) {
+
+		host := u.Hostname()
+	    port := u.Port()
+	    password, _ := u.User.Password()
+		username := u.User.Username()
+
+		config := &tls.Config{
+			InsecureSkipVerify: true,
+			ServerName: host,
+		}
+	
+
 		return redis.NewClient(&redis.Options{
-			Addr:     fmt.Sprintf("%s:%s", host, port),
-			Password: password,
-			DB:       0,
-			OnConnect: func(ctx context.Context, cn *redis.Conn) error {
-				log.Println("Successfully reconnected to Redis.")
-				return nil
-			},
+			Addr:      fmt.Sprintf("%s:%s", host, port),
+			Username:  username,
+			Password:  password, 
+			DB:        0,
+			TLSConfig: config,
+			DialTimeout: 60 * time.Second,  
+		    ReadTimeout: 60 * time.Second,
 		}), nil
 	}
 
@@ -94,6 +95,7 @@ func RedisConfig(redisURL string) (*Redis, error) {
 
 			time.Sleep(1 * time.Minute)
 		}
+
 	}()
 
 	return &Redis{
@@ -108,7 +110,7 @@ func (r *Redis) CacheSet(cachedData interface{}, cacheKey string) error {
 		return err
 	}
 
-	if err := r.client.Set(ctx, cacheKey, jsonData, 10*time.Second).Err(); err != nil {
+	if err := r.client.Set(ctx, cacheKey, jsonData, 10 * time.Second).Err(); err != nil {
 		return err
 	}
 
