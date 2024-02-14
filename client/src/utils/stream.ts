@@ -1,3 +1,4 @@
+import pako from 'pako'
 
 export const getBlobUrl = (data: string) => {
 
@@ -10,10 +11,13 @@ export const getBlobUrl = (data: string) => {
   
   
   const bufferArray = new Uint8Array(bytesArray);
-  const blob = new Blob([bufferArray], { type: 'audio/mpeg' });
+  const decompressed = pako.inflate(bufferArray)
+
+  const blob = new Blob([decompressed], { type: 'audio/mpeg' });
   return URL.createObjectURL(blob);
   
 };
+
 
 
 export const downloadAudio = (base64StreamBinary: string) => {
@@ -30,3 +34,4 @@ export const downloadAudio = (base64StreamBinary: string) => {
   URL.revokeObjectURL(audioURL);
 
 }
+
