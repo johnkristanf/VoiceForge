@@ -41,22 +41,32 @@ export function SpeechForm() {
 
     setisSubmiting(true)
 
-    const streamBlob = await streamAudio(textToSpeechData);
+    const streamRes = await streamAudio(textToSpeechData);
 
-    if (streamBlob instanceof Blob) {
-      const audioURL = URL.createObjectURL(streamBlob);
-      setaudioURL(audioURL)
-    }
+    if (streamRes) setaudioURL(streamRes)
+    
+
     setisSubmiting(false)
     setText('')
 
   };
 
+  useEffect(() => {
+
+    if (Text === '') {
+      setisSubmiting(true);
+      return
+    }
+
+    setisSubmiting(false);
+
+  }, [Text]);
+
 
 
   return (
     <>
-        <div className="flex flex-col w-[60%] mt-12 ml-24">
+        <div className="flex flex-col w-[60%] mt-12 ml-24 max-lg:w-[90%] max-lg:ml-0 max-lg:mt-24 ">
 
             <div className="flex w-full">
               <SpeechVoiceBtn selectedVoice={selectedVoice} setOpenVoiceModal={setOpenVoiceModal} />
@@ -91,36 +101,54 @@ export function SpeechForm() {
 
 
 function AudioPlayer({ audioURL }: any) {
-  
-  const [audioDataArray, setAudioDataArray] = useState<AudioDataTypes>();
-  const [deletedID, setdeletedID] = useState<Number>()
 
-    useEffect(() => {
-      async function fetchData() {
+  const [audioDataArray, setAudioDataArray] = useState<AudioDataTypes>();
+  const [deletedID, setDeletedID] = useState<Number>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    async function fetchData() {
+
+      setIsLoading(true);
+
+      try {
         const { audioDataArray } = await fetchAudioData();
         setAudioDataArray(audioDataArray);
+
+      } catch (error) {
+        console.error("Error fetching audio data:", error);
+
+      } finally {
+        setIsLoading(false);
       }
 
-      fetchData();
+    }
 
-    }, [audioURL, deletedID]);
+    fetchData();
 
+  }, [audioURL, deletedID]);
+
+  if (isLoading) {
+    return <div className="text-white text-2xl font-bold">Loading Speech...</div>;
+  }
+
+  if (!audioDataArray || audioDataArray.length === 0) {
+    return <div className="text-white text-2xl font-bold">No generated speech available</div>;
+  }
 
   return (
-
     <div className="flex flex-col gap-3 h-[40%] text-white">
       <h1 className="text-white font-bold text-2xl">Generated Speech</h1>
-
+      <p className="text-white font-bold text-md">210 words limit</p><br />
+      
       <div className="overflow-auto scrollable-container">
-
         {audioDataArray?.map((item) => (
-          
+
           <div
             key={item.audioStream} 
             className="flex justify-around items-center bg-slate-900 p-3 mb-4 rounded-md gap-5"
           >
-
-            <h1 className="w-[40%] truncate font-bold">{item.audioText}</h1>
+            <h1 className="w-[50%] truncate font-bold">{item.audioText}</h1>
 
             <audio
               src={getBlobUrl(item.audioStream)}
@@ -128,15 +156,10 @@ function AudioPlayer({ audioURL }: any) {
               className="h-[40px]"
               controlsList="nodownload nofullscreen noremoteplayback"
             />
-
-            <StreamAudioActionsBtn setdeletedID={setdeletedID} audio_id={item.audio_id} base64StreamBinary={item.audioStream} />
-
+            <StreamAudioActionsBtn setdeletedID={setDeletedID} audio_id={item.audio_id} base64StreamBinary={item.audioStream} />
           </div>
-
         ))}
-
       </div>
     </div>
   );
 }
-

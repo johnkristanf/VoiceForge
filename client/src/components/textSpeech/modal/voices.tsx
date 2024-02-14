@@ -288,7 +288,7 @@ function VoiceInUse({ selectedVoice, setselectedSpeed, setOpenVoiceModal }: any)
                 <button disabled>{ selectedVoice?.name }</button>
 
                 <select 
-                    defaultValue={numbersArray[0]}
+                    defaultValue={numbersArray[5]}
                     className="bg-transparent focus:outline-none" 
                     onChange={(e) => setselectedSpeed(e.target.value)}
                     >

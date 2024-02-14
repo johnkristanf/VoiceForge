@@ -56,7 +56,7 @@ const SignupForm = ({setSignup}: any) => {
               <div className="text-center">
                 <img
                   className="mx-auto w-24 rounded-full"
-                  src="./public/img/VF_logo.png"
+                  src="/img/VF_logo.png"
                   alt="logo" />
                 <h4 className="mb-12 mt-1 pb-1 text-xl font-semibold">
                   Welcome to VoiceForge
@@ -207,7 +207,7 @@ const LoginForm = ({setSignup}: any) => {
               <div className="text-center">
                 <img
                   className="mx-auto w-24 rounded-full"
-                  src="./public/img/VF_logo.png"
+                  src="/img/VF_logo.png"
                   alt="logo" />
                 <h4 className="mb-12 mt-1 pb-1 text-xl font-semibold">
                   Welcome to VoiceForge

@@ -56,15 +56,14 @@ export function GenerateSpeechBtn({isSubmiting}: any){
 
 
     return(
-        <div className="flex flex-col p-4 gap-3 bg-slate-900 w-[40%] h-[75%] rounded-md">
+        <div className="flex flex-col gap-3 w-[40%] h-[75%] rounded-md">
             <button 
                 disabled={isSubmiting}
-                className={ isSubmiting ? "text-white font-semibold bg-gray-400 w-full rounded-md p-5 bg-gray-400 cursor-no-drop opacity-75"  
-                                        : "text-white font-semibold bg-indigo-800 w-full rounded-md p-5 hover:opacity-75"}>
-                Generate Speech
+                className={ isSubmiting ? "text-white font-semibold bg-gray-400 w-full h-full rounded-md p-5 bg-gray-400 cursor-no-drop opacity-75 text-xl"  
+                                        : "text-white font-semibold bg-indigo-800 w-full h-full rounded-md p-5 hover:opacity-75 text-xl"}>
+                <FontAwesomeIcon icon={faMusic}/> Generate Speech
             </button>
 
-            <p className="text-white font-bold opacity-75 text-[12px]">Unleash the potential of text-to-speech innovation and share your message in a unique and engaging way</p>
         </div>
     )
 }
@@ -74,8 +73,8 @@ export function StreamAudioActionsBtn({setdeletedID, audio_id, base64StreamBinar
 
     return(
         <div className="flex gap-5">
-            <FontAwesomeIcon icon={faDownload} onClick={() => downloadAudio(base64StreamBinary)}/>
-            <FontAwesomeIcon icon={faTrash} onClick={() => deleteAudio(audio_id, setdeletedID)} />
+            <FontAwesomeIcon className='hover:opacity-75 hover:cursor-pointer' icon={faDownload} onClick={() => downloadAudio(base64StreamBinary)}/>
+            <FontAwesomeIcon className='hover:opacity-75 hover:cursor-pointer' icon={faTrash} onClick={() => deleteAudio(audio_id, setdeletedID)} />
         </div>
     )
 }
