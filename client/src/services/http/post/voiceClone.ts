@@ -33,11 +33,11 @@ export const DeletevoiceClone = async (voice_id: string) => {
         })
 
         if(response.data) return true
-
-        return false
         
     } catch (error) {
         console.error(error)
+        return false
+
     }
 }
  

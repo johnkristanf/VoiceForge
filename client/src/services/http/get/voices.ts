@@ -8,8 +8,6 @@ export async function getVoices(SearchVoice: string) {
             withCredentials: true
         })
 
-        console.log("voices ni mego", response.data)
-
         if (response) return response.data.voices
 
     } catch (error) {

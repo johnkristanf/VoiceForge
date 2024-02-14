@@ -1,18 +1,18 @@
 import axios from "axios";
 import { TextToSpeech } from "../../../types/textSpeech";
 
-export const streamAudio = async (data: TextToSpeech): Promise<Blob | undefined> => {
+export const streamAudio = async (data: TextToSpeech): Promise<string | undefined> => {
     
     try {
 
-        const res = await axios.post("http://localhost:800/api/stream/voices", data, {
-          responseType: 'blob',
-          withCredentials: true
+        const response = await axios.post("http://localhost:800/api/stream/voices", data, {
+           responseType: 'text',
+           withCredentials: true
         })
 
-        console.log('response stream', res)
+        console.log('response stream', response)
 
-        if(res) return res.data
+        if(response) return response.data
 
     } catch (error) {
         console.error(error)
