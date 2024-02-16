@@ -4,7 +4,7 @@ import { LoginCredentials, SignupCredentials } from "../../../types/auth";
 export const Signup = async (signupCredentials: SignupCredentials) => {
 
     try {
-        const response = await axios.post("http://localhost:800/auth/signup", signupCredentials, {
+        const response = await axios.post("https://vf-server.onrender.com/auth/signup", signupCredentials, {
             responseType: 'json'
         })
 

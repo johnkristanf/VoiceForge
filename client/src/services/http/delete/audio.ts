@@ -7,8 +7,6 @@ export const deleteAudio = async (audio_id: string, setdeletedID: any) => {
             responseType: 'text',
             withCredentials: true
         });
-
-        console.log('delete', response.data)
         
         setdeletedID(response.data)
 

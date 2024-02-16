@@ -10,8 +10,6 @@ export const streamAudio = async (data: TextToSpeech): Promise<string | undefine
            withCredentials: true
         })
 
-        console.log('response stream', response)
-
         if(response) return response.data
 
     } catch (error) {

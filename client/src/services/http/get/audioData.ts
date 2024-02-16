@@ -10,8 +10,6 @@ export const fetchAudioData = async () => {
             withCredentials: true
         })
 
-        console.log("fetchAudioData", response)
-
         if (response) return response.data
         
     } catch (error) {

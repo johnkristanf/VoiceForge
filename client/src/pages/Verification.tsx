@@ -34,8 +34,6 @@ const Verification = () => {
     const errorMsgRef = useRef<HTMLParagraphElement | null>(null);
     const { EmailVerfication } = useUserData()
 
-    console.log("EmailVerfication", EmailVerfication)
-
     const onSubmit = async (codes: CodeTypes) => {
 
         let verification_code = ""
