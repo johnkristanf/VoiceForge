@@ -64,12 +64,10 @@ func RedisConfig(redisURL string) (*Redis, error) {
 	}
 
 	// TEST CONNECTION TO THE REDIS SERVER
-	pong, err := client.Ping(ctx).Result(); 
+	_, err = client.Ping(ctx).Result(); 
 	if err != nil {
 		return nil, err
 	}
-
-	log.Println("CONNECT NIMAL", pong)
 
 
 	go func() {

@@ -102,6 +102,8 @@ func (sql *SQL_DB) Voices(search_voice string) ([]*types.FetchVoiceTypes, error)
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	var fetchVoices []*types.FetchVoiceTypes
 
 	for rows.Next() {

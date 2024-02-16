@@ -3,11 +3,10 @@ import axios from "axios";
 export const RefreshToken = async (): Promise<boolean | undefined> => {
     
     try {
-        const response = await axios.post('http://localhost:800/token/refresh', {}, {
+        const response = await axios.post('https://vf-server.onrender.com/refresh', {}, {
             withCredentials: true,
         });
 
-        console.log("response in refresh token endpoint", response)
 
         return response.data.New_Access_Token_Generated; // Return the boolean value directly
 

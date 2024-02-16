@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	accessTokenDuration   = 15 * time.Minute
+	accessTokenDuration   = 30 * time.Minute
 	refreshTokenDuration  = 3 * 24 * time.Hour
 )
 

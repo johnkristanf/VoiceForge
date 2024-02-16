@@ -4,7 +4,7 @@ export const FetchUserData = async (setUnauthorized: any) => {
 
     try {
 
-        const response = await axios.get("http://localhost:800/user/data", {
+        const response = await axios.get("https://vf-server.onrender.com/user/data", {
             responseType: 'json',
             withCredentials: true
         })

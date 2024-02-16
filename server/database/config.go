@@ -1,7 +1,6 @@
 package database
 
 import (
-	"bytes"
 	"database/sql"
 	"os"
 
@@ -14,7 +13,7 @@ type Method interface {
 	InsertVoice(*types.VoiceStruct) error
 	Voices(string) ([]*types.FetchVoiceTypes, error)
 
-	InsertAudioStream(string, *bytes.Buffer) error
+	InsertAudioStream(string, []byte) (int64, error)
 	FetchAudioStream() ([]*types.AudioStruct, error)
 	DeleteAudioData(int64) (int64, error)
 
@@ -74,6 +73,10 @@ func (sql *SQL_DB) DBInit() error {
 	}
 
 	if err := sql.CreateAudioTable(); err != nil {
+		return err
+	}
+
+	if err := sql.CreateAudioIndex(); err != nil{
 		return err
 	}
 

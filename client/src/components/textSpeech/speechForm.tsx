@@ -44,7 +44,6 @@ export function SpeechForm() {
     const streamRes = await streamAudio(textToSpeechData);
 
     if (streamRes) setaudioURL(streamRes)
-    
 
     setisSubmiting(false)
     setText('')
@@ -112,7 +111,7 @@ function AudioPlayer({ audioURL }: any) {
       setIsLoading(true);
 
       try {
-        const { audioDataArray } = await fetchAudioData();
+        const audioDataArray = await fetchAudioData();
         setAudioDataArray(audioDataArray);
 
       } catch (error) {
@@ -139,7 +138,7 @@ function AudioPlayer({ audioURL }: any) {
   return (
     <div className="flex flex-col gap-3 h-[40%] text-white">
       <h1 className="text-white font-bold text-2xl">Generated Speech</h1>
-      <p className="text-white font-bold text-md">210 words limit</p><br />
+      <p className="text-white font-bold text-md">180 words limit</p><br />
       
       <div className="overflow-auto scrollable-container">
         {audioDataArray?.map((item) => (

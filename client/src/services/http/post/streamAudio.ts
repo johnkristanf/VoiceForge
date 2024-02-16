@@ -5,7 +5,7 @@ export const streamAudio = async (data: TextToSpeech): Promise<string | undefine
     
     try {
 
-        const response = await axios.post("http://localhost:800/api/stream/voices", data, {
+        const response = await axios.post("https://vf-server.onrender.com/api/stream/voices", data, {
            responseType: 'text',
            withCredentials: true
         })

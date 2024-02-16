@@ -20,7 +20,7 @@ export const Login = async (loginCredentials: LoginCredentials) => {
 
     try {
 
-        const response = await axios.post("http://localhost:800/auth/login", loginCredentials, {
+        const response = await axios.post("https://vf-server.onrender.com/auth/login", loginCredentials, {
             responseType: 'json',
             withCredentials: true
         })
@@ -38,7 +38,7 @@ export const Verify = async (verification_code :string) => {
 
     try {
 
-        const response = await axios.post("http://locahost:800/auth/verification", { verification_code: verification_code }, {
+        const response = await axios.post("https://vf-server.onrender.com/auth/verification", { verification_code: verification_code }, {
             responseType: 'json',
             withCredentials: true
         })
@@ -56,7 +56,7 @@ export const Logout = async () => {
 
     try {
 
-        const response = await axios.post("http://locahost:800/logout", {}, {
+        const response = await axios.post("https://vf-server.onrender.com/logout", {}, {
             withCredentials: true
         })
 

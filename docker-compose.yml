@@ -32,8 +32,8 @@ services:
       SMTP_PASSWORD: bkzd cgbb wywn qmvi
       SMTP_FROM: johnkristan01@gmail.com
 
-      AUTHORIZATION_API_KEY: cce9dbd9b9814894880b9299c7528db3
-      USER_API_KEY: YazwHTCjhnOMBqwotlb5kFUrx3X2
+      AUTHORIZATION_API_KEY: 5e8988bd9f954d13824c6a51ffdbd634
+      USER_API_KEY: cqyGECJHZjQEkr5aLyliSOPTGmN2
       
       SERVER_PORT: 800
 

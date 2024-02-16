@@ -40,18 +40,17 @@ func main() {
 	}
 
 	cors := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:500"},
+		AllowedOrigins:   []string{"http://localhost:500", "https://voiceforge.vercel.app"},
 		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
 		AllowCredentials: true,
-
-		AllowedHeaders: []string{"*"},
+		AllowedHeaders:   []string{"*"},
 	})
 
 	server := handlers.NewAPIServer(fmt.Sprintf(":%s", os.Getenv("SERVER_PORT")), db, cors, client, smtpClient)
 
-	fmt.Println("port", os.Getenv("SERVER_PORT"))
-
 	if err := server.Run(); err != nil {
 		log.Fatalln("SERVER ERROR", err)
 	}
+
 }
+

@@ -1,7 +1,7 @@
 package database
 
 import (
-	"bytes"
+	"database/sql"
 
 	"github.com/johnkristanf/VoiceForge/server/types"
 )
@@ -22,11 +22,11 @@ func (sql *SQL_DB) CreateAudioTable() error {
 	return nil
 }
 
-func (sql *SQL_DB) InsertAudioStream(text string, audiostreambase64 *bytes.Buffer) error {
+func (sql *SQL_DB) CreateAudioIndex() error {
 
-	query := "INSERT INTO audio (text, audioStreamBase64) VALUES ($1, $2)"
+	query := "CREATE INDEX IF NOT EXISTS idx_audio_id ON audio (id);"
 
-	_, err := sql.database.Exec(query, text, audiostreambase64.Bytes())
+	_, err := sql.database.Exec(query)
 	if err != nil {
 		return err
 	}
@@ -34,14 +34,78 @@ func (sql *SQL_DB) InsertAudioStream(text string, audiostreambase64 *bytes.Buffe
 	return nil
 }
 
+func (sql *SQL_DB) InsertAudioStream(text string, audiostreambase64 []byte) (int64, error) {
+
+	var lastInsertedID int64
+
+	query := "INSERT INTO audio (text, audioStreamBase64) VALUES ($1, $2) RETURNING id"
+
+    err := sql.database.QueryRow(query, text, audiostreambase64).Scan(&lastInsertedID)
+	if err != nil{
+		return 0, err
+	}
+
+	return lastInsertedID, nil
+}
+
 func (sql *SQL_DB) FetchAudioStream() ([]*types.AudioStruct, error) {
 
 	query := "SELECT * FROM audio;"
+
+	errorChan := make(chan error, 1)
+	audioStreamChan := make(chan []*types.AudioStruct, 1)
 
 	rows, err := sql.database.Query(query)
 	if err != nil {
 		return nil, err
 	}
+
+	defer rows.Close()
+
+	go func ()  {
+		defer close(errorChan)
+		defer close(audioStreamChan)
+		
+		audioStreamData, err := ScantoRowsAudioData(rows)
+		if err != nil{
+			errorChan <- err
+		}
+
+		audioStreamChan <- audioStreamData
+		
+	}()
+
+	select{
+
+	   case err := <- errorChan:
+		return nil, err
+
+	   case audioStreamData := <- audioStreamChan:
+		return audioStreamData, nil
+		
+	}
+	
+}
+
+
+func (sql *SQL_DB) DeleteAudioData(audio_id int64) (int64, error) {
+
+	var lastDeletedID int64
+
+	query := "DELETE FROM audio WHERE id = $1 RETURNING id"
+
+	err := sql.database.QueryRow(query, audio_id).Scan(&lastDeletedID)
+	if err != nil{
+		return 0, err
+	}
+
+	return lastDeletedID, nil
+}
+
+
+
+
+func ScantoRowsAudioData(rows *sql.Rows) ([]*types.AudioStruct, error)  {
 
 	audioStreamData := []*types.AudioStruct{}
 
@@ -57,22 +121,4 @@ func (sql *SQL_DB) FetchAudioStream() ([]*types.AudioStruct, error) {
 	}
 
 	return audioStreamData, nil
-}
-
-func (sql *SQL_DB) DeleteAudioData(audio_id int64) (int64, error) {
-	query := "DELETE FROM audio WHERE id = $1 RETURNING id"
-
-	rows, err := sql.database.Query(query, audio_id)
-	if err != nil {
-		return 0, err
-	}
-
-	var lastDeletedID int64
-	for rows.Next() {
-		if err := rows.Scan(&lastDeletedID); err != nil {
-			return 0, err
-		}
-	}
-
-	return lastDeletedID, nil
 }
