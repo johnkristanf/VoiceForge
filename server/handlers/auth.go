@@ -78,7 +78,7 @@ func (s *ApiServer) LoginHandler(res http.ResponseWriter, req *http.Request) err
 			return err
 		}
 
-		utils.SetCookie(res, verificationToken, time.Now().Add(15 * time.Minute), "Verification_Token")
+		utils.SetCookie(res, verificationToken, time.Now().Add(30 * time.Minute), "Verification_Token")
 
 		return utils.WriteJson(res, http.StatusUnauthorized, map[string]bool{"Need_Verification": true})
 
@@ -154,7 +154,7 @@ func (s *ApiServer) RefreshTokenHandler(res http.ResponseWriter, req *http.Reque
 		return
 	}
 
-	utils.SetCookie(res, access_token, time.Now().Add(15*time.Minute), "Access_Token")
+	utils.SetCookie(res, access_token, time.Now().Add(30 * time.Minute), "Access_Token")
 
 	utils.WriteJson(res, http.StatusOK, map[string]bool{"New_Access_Token_Generated": true})
 
@@ -202,7 +202,7 @@ func (s *ApiServer) VerifyUserHandler(res http.ResponseWriter, req *http.Request
 		return refreshErr
 	}
 
-	utils.SetCookie(res, access_token, time.Now().Add(15*time.Minute), "Access_Token")
+	utils.SetCookie(res, access_token, time.Now().Add(30 *time.Minute), "Access_Token")
 
 	utils.SetCookie(res, refreshToken, time.Now().Add(3*24*time.Hour), "Refresh_Token")
 
