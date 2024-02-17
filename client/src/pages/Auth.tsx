@@ -4,8 +4,6 @@ import { LoginCredentials, SignupCredentials, validEmail } from "../types/auth";
 import { SignupValidation } from "../validator/auth";
 import { Login, Signup } from "../services/http/post/auth";
 
-import { useUserData } from "../services/context/voiceContext"; 
-
 const Auth: React.FC  = () => {
   const [Signup, setSignup] = useState<boolean>(false);
 

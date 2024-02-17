@@ -237,16 +237,16 @@ func ParseVerificationClaims(cookie *http.Cookie) (*types.ParseVerificationClaim
 	})
 
 	if err != nil || !token.Valid {
-		return nil, fmt.Errorf("Unauthorized: Access is denied due to invalid credentials")
+		return nil, fmt.Errorf("unauthorized: access is denied due to invalid credentials")
 	}
 
 	user, ok := token.Claims.(*types.ParseVerificationClaims)
 	if !ok {
-		return nil, fmt.Errorf("Failed to Claim Payload From Struct")
+		return nil, fmt.Errorf("failed to Claim Payload From Struct")
 	}
 
-	if time.Unix(user.ExpiresAt, 0).Sub(time.Now()) < 0 {
-		return nil, fmt.Errorf("Unauthorized")
+	if time.Until(time.Unix(user.ExpiresAt, 0)) < 0 {
+		return nil, fmt.Errorf("unauthorized: access denied expired access token")
 	}
 
 	return &types.ParseVerificationClaims{
