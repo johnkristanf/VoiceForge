@@ -74,6 +74,7 @@ func (sql *SQL_DB) CheckEmailExist(email string) (*types.UserEmailExist, error) 
 
 
 func (sql *SQL_DB) VerifyUser(user_id int64, hashedCode string) error {
+
 	query := `UPDATE "user" SET verification_token = $1 WHERE user_id = $2;`;
 
 	_, err := sql.database.Exec(query, hashedCode, user_id)

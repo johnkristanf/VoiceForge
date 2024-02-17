@@ -1,9 +1,6 @@
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
 import { Verify } from "../services/http/post/auth";
 import { useRef } from "react";
-
-import { useUserData } from "../services/context/voiceContext"; 
 
 function classNames(...classes: any) {
    return classes.filter(Boolean).join(' ');
@@ -30,9 +27,7 @@ type CodeTypes = {
 const Verification = () => {
 
     const { register, reset, handleSubmit} = useForm<CodeTypes>();
-    const navigate = useNavigate()
     const errorMsgRef = useRef<HTMLParagraphElement | null>(null);
-    const { EmailVerfication } = useUserData()
 
     const onSubmit = async (codes: CodeTypes) => {
 
@@ -50,7 +45,7 @@ const Verification = () => {
             return
         }
 
-        navigate("/text-speech")       
+        window.location.href = '/text-speech';
     }
 
     return (
@@ -64,7 +59,7 @@ const Verification = () => {
                 <p>Email Verification</p>
                 </div>
                 <div className="flex flex-row text-sm font-medium text-gray-400">
-                <p>We have sent a code to your email {EmailVerfication}</p>
+                <p>We have sent a code to your email</p>
                 </div>
             </div>
 

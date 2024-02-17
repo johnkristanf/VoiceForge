@@ -170,6 +170,7 @@ const LoginForm = ({setSignup}: any) => {
     if(login.Need_Verification){
       window.location.href = '/verify'
       reset()
+      setisSubmitting(false)
       return
     }
 

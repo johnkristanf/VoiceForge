@@ -160,6 +160,8 @@ func (s *ApiServer) RefreshTokenHandler(res http.ResponseWriter, req *http.Reque
 
 }
 
+
+
 func (s *ApiServer) VerifyUserHandler(res http.ResponseWriter, req *http.Request) error {
 
 	if err := utils.HttpMethod(http.MethodPost, req); err != nil {
@@ -179,14 +181,12 @@ func (s *ApiServer) VerifyUserHandler(res http.ResponseWriter, req *http.Request
 		return utils.WriteJson(res, http.StatusUnauthorized, map[string]string{"ERROR": parseErr.Error()})
 	}
 
-	body, readErr := io.ReadAll(req.Body)
-	if readErr != nil {
-		return readErr
-	}
-
-	if err := json.Unmarshal(body, &code); err != nil {
+	if err := json.NewDecoder(req.Body).Decode(&code); err != nil{
 		return err
 	}
+
+
+	fmt.Println("userClaims sa verify user handler", userClaims)
 
 	if err := bcrypt.CompareHashAndPassword([]byte(userClaims.HashedCode), []byte(code.Code)); err != nil {
 		return utils.WriteJson(res, http.StatusBadRequest, map[string]string{"ERROR": "Incorrect Verification Code"})
@@ -202,9 +202,9 @@ func (s *ApiServer) VerifyUserHandler(res http.ResponseWriter, req *http.Request
 		return refreshErr
 	}
 
-	utils.SetCookie(res, access_token, time.Now().Add(30 *time.Minute), "Access_Token")
+	utils.SetCookie(res, access_token, time.Now().Add(30 * time.Minute), "Access_Token")
 
-	utils.SetCookie(res, refreshToken, time.Now().Add(3*24*time.Hour), "Refresh_Token")
+	utils.SetCookie(res, refreshToken, time.Now().Add(3* 24 * time.Hour), "Refresh_Token")
 
 	go func() {
 		if err := s.database.VerifyUser(userClaims.ID, userClaims.HashedCode); err != nil {
@@ -217,14 +217,8 @@ func (s *ApiServer) VerifyUserHandler(res http.ResponseWriter, req *http.Request
 		return err
 	}
 
-	Verification_TokenCookie := &http.Cookie{
-		Name:    "Verification_Token",
-		Value:   "",
-		Expires: time.Now().AddDate(0, 0, -1),
-		Path:    "/",
-	}
-
-	http.SetCookie(res, Verification_TokenCookie)
+	utils.SetCookie(res, "", time.Now().AddDate(0, 0, -1), "Verification_Token")
+	
 
 	return utils.WriteJson(res, http.StatusOK, map[string]bool{"Verified": true})
 
