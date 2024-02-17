@@ -138,7 +138,8 @@ function AudioPlayer({ audioURL }: any) {
   return (
     <div className="flex flex-col gap-3 h-[40%] text-white">
       <h1 className="text-white font-bold text-2xl">Generated Speech</h1>
-      <p className="text-white font-bold text-md">180 words limit</p><br />
+      <p className="text-white font-bold text-md">12,500 characters limit</p><br />
+      <p className="text-white font-bold text-md">1 Instant voice clone only</p><br />
       
       <div className="overflow-auto scrollable-container">
         {audioDataArray?.map((item) => (
